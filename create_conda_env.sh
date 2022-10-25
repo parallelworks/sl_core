@@ -11,7 +11,7 @@
 #
 # With a fast internet connection
 # (i.e. download time minimal)
-# this process takes about 5 min.
+# this process takes < 5 min.
 #===========================
 
 # Miniconda install location
