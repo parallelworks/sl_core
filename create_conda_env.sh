@@ -40,22 +40,37 @@ my_env="sl_onnx"
 # is automatically selected.
 # Currently, sklearn is not compatible
 # with Python 3.10, so must use Python 3.9.
-python_version="=3.9"
+# This Python 3.9 works except that one of
+# the error message in scikit-learn attempts
+# to use decode("latin1") on a string which
+# Python 3.9 cannot handle (decode was
+# depreciated in Python 3, but I think
+# Python 3.7 still supports it somehow
+# while Python 3.9 is too far down the
+# the road to support decode.)
+python_version="=3.7"
 sklearn_version="==0.23.2"
 xgboost_version="==1.3.3"
 sklopt_version="==0.8.1"
+
+# Added here because sklearn 0.23.2 attempts
+# to load a thing depreciated from scipy after 1.7.0.
+# https://docs.scipy.org/doc/scipy-1.7.1/reference/reference/generated/scipy.linalg.pinv2.html
+scipy_version="==1.7.0"
 
 # Start conda
 source ${miniconda_loc}/etc/profile.d/conda.sh
 conda activate base
 
 # Create new environment
-conda create -y --name $my_env python=3.9 ipython
+# (if we are running Jupter notebooks, include ipython here)
+conda create -y --name $my_env python${python_version}
 
 # Jump into new environment
 conda activate $my_env
 
 # Install packages
+conda install -y -c conda-forge scipy${scipy_version}
 conda install -y pandas
 conda install -y matplotlib
 conda install -y scikit-learn${sklearn_version}

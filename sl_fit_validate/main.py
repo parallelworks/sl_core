@@ -31,8 +31,8 @@ from sklearn.ensemble import StackingRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.inspection import permutation_importance
-from imblearn.over_sampling import RandomOverSampler
-from imblearn.under_sampling import RandomUnderSampler
+#from imblearn.over_sampling import RandomOverSampler
+#from imblearn.under_sampling import RandomUnderSampler
 
 import joblib; print(joblib.__version__)
 
@@ -103,15 +103,19 @@ def format_estimators(estimators_dict):
 #=======================================
 if __name__ == '__main__':
 
-    # Parse arguments
+    #===========================
+    # Command line inputs
+    #===========================
+    print("Parsing SuperLearner input arguments...")
     parser = argparse.ArgumentParser()
     parsed, unknown = parser.parse_known_args()
     for arg in unknown:
         if arg.startswith(("-", "--")):
             parser.add_argument(arg)
+            print(arg)
 
     args = parser.parse_args()
-
+    
     if args.backend == 'dask':
         n_jobs = int(args.n_jobs)
         # FIXME: Make this code common
@@ -135,11 +139,15 @@ if __name__ == '__main__':
         backend_params = {}
         n_jobs = None
 
+    #===========================
     # Create Model Directory
+    #===========================
     args.model_dir = args.model_dir.replace('*','')
     os.makedirs(args.model_dir, exist_ok = True)
 
+    #===========================
     # Load Data
+    #===========================
     X, Y, inames, onames = load_data_csv_io(args.data, int(args.num_inputs))
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y)
 
@@ -155,13 +163,23 @@ if __name__ == '__main__':
     #rus = RandomUnderSampler()
     #X_train, Y_train = rus.fit_resample(X_train, Y_train)
     #Y_train = np.expand_dims(Y_train, axis=1)
-    
-    # Load SuperLearner Configuration
+
+    #===========================
+    # Load SuperLearner config as a package
+    #===========================
+    print("Loading SuperLearner configuration...")
+    print("Loading from: "+args.superlearner_conf)
+    print("Dirname:  "+os.path.dirname(args.superlearner_conf))
+    print("Basename: "+os.path.basename(args.superlearner_conf.replace('.py','')))
+
+    # Add config's dir to the path
     sys.path.append(os.path.dirname(args.superlearner_conf))
     sl_conf = getattr(
+        # Second, import the file as a module.  Drop ".py".
         importlib.import_module(os.path.basename(args.superlearner_conf.replace('.py',''))),
         'SuperLearnerConf'
     )
+
     # The SL configuration file is needed to load the SL pickle
     try:
         # To prevent same file error!
@@ -169,7 +187,9 @@ if __name__ == '__main__':
     except:
         pass # FIXME: Add error handling!
 
-    # Running hyperparameter optimization:
+    #================================
+    # Run hyperparameter optimization
+    #================================
     if args.hpo == "True":
         sl_conf_hpo = deepcopy(sl_conf)
         sl_conf_hpo['estimators'] = {}
@@ -193,7 +213,9 @@ if __name__ == '__main__':
 
         sl_conf = sl_conf_hpo
 
-    # Define SuperLearners:
+    #========================
+    # Define SuperLearners
+    #========================
     SuperLearners = {}
     for oi, oname in enumerate(onames):
         print('Defining estimator for output: ' + oname, flush = True)
