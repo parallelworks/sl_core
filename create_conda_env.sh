@@ -12,6 +12,26 @@
 # With a fast internet connection
 # (i.e. download time minimal)
 # this process takes < 5 min.
+#
+# For moving conda envs around,
+# it is possible to put the
+# miniconda directory in a tarball
+# but the paths will need to be
+# adjusted.  The download and
+# decompression time can be long.
+# As an alternative, consider:
+# conda list -e > requirements.txt
+# to export a list of the req's
+# and then:
+# conda create --name <env> --file requirements.txt
+# to build another env elsewhere.
+# This second step runs faster
+# than this script because
+# Conda does not stop to solve
+# the environment.  Rather, it
+# just pulls all the listed
+# packages assuming everything
+# is compatible.
 #===========================
 
 # Miniconda install location
@@ -57,6 +77,16 @@ sklopt_version="==0.8.1"
 # to load a thing depreciated from scipy after 1.7.0.
 # https://docs.scipy.org/doc/scipy-1.7.1/reference/reference/generated/scipy.linalg.pinv2.html
 scipy_version="==1.7.0"
+
+#======================================
+# Version adjustment
+#======================================
+# Try current versions of everything!
+python_version="=3.9"
+sklearn_version=""
+xgboost_version=""
+sklopt_version=""
+scipy_version=""
 
 # Start conda
 source ${miniconda_loc}/etc/profile.d/conda.sh
