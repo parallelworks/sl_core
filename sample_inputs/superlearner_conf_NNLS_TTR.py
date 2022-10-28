@@ -83,7 +83,7 @@ SuperLearnerConf = {
     "final_estimator": Pipeline(
         [
             ('scale', StandardScaler()),
-            ('final',RidgeCV())
+            ('final',LinearRegression(positive=True))
         ]
     ),
     "estimators": {
