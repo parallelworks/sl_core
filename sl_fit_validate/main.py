@@ -37,7 +37,9 @@ from sklearn.inspection import permutation_importance
 import joblib; print(joblib.__version__)
 
 import pandas as pd
+import math
 import numpy as np
+import smogn
 
 import importlib
 
@@ -82,6 +84,14 @@ def load_data_csv_io(data_csv, num_inputs):
     X = data_df.values[:, :num_inputs]
     Y = data_df.values[:, num_inputs:]
     
+    return X, Y, pnames[:num_inputs], pnames[num_inputs:]
+
+def load_data_df_io(data_df, num_inputs):
+    """ TODO docstring """
+    data_df = clean_data_df(data_df)
+    pnames = list(data_df)
+    X = data_df.values[:, :num_inputs]
+    Y = data_df.values[:, num_inputs:]
     return X, Y, pnames[:num_inputs], pnames[num_inputs:]
 
 def save_data_csv_io(x_np, y_np, inames, onames, out_file_name):
@@ -148,8 +158,63 @@ if __name__ == '__main__':
     #===========================
     # Load Data
     #===========================
-    X, Y, inames, onames = load_data_csv_io(args.data, int(args.num_inputs))
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y)
+
+    SEED = 1337
+    data = pd.read_csv(args.data).astype(np.float32)
+    data = clean_data_df(data)
+    # Shuffle the entire dataset
+    data = data.sample(frac=1, random_state=SEED).reset_index(drop=True)
+    # remove 30% of the dataset for testing later
+    smogn_test = data.iloc[:math.ceil(len(data)*.3), :]
+    smogn_train = data.iloc[math.ceil(len(data)*.3):, :].reset_index()
+
+    smogn_test.to_csv(args.model_dir+"/smogn_test.csv", index=False, na_rep='NaN')
+
+    # smogn
+
+    # specify phi relevance values
+    # rg_mtrx = [
+    #     [0,  1, 0],  ## over-sample ("minority")
+    #     [-10, 0, 0],  ## under-sample ("majority")
+    #     [-20, 0, 0],  ## under-sample
+    #     [-30, 0, 0],  ## under-sample
+    # ]
+
+    regular_smogn = smogn_train
+    extreme_smogn = smogn_train
+    y_col_name = "rate.mg.per.L.per.h"
+
+    for i in range(1):
+        regular_smogn = regular_smogn.append(smogn.smoter(
+            data = regular_smogn,
+            y = y_col_name,
+            drop_na_row = True
+        ))
+        regular_smogn = regular_smogn.drop_duplicates()
+
+        extreme_smogn = extreme_smogn.append(smogn.smoter(
+            data = extreme_smogn,
+            y = y_col_name,
+            drop_na_row = True,
+            # rel_method = 'manual',    ## string ('auto' or 'manual')
+            # rel_ctrl_pts_rg = rg_mtrx, ## 2d array (format: [x, y])
+            samp_method = "extreme"
+        ))
+        extreme_smogn = extreme_smogn.drop_duplicates()
+
+    final_smogn_train = regular_smogn.append(extreme_smogn)
+    final_smogn_train = final_smogn_train.drop_duplicates()
+    final_smogn_train = final_smogn_train.drop(columns=["index"])
+    final_smogn_train.to_csv(args.model_dir + "/final_smogn_train.csv", index=False, na_rep='NaN')
+
+    # process data for the superlearner
+    X, Y, inames, onames = load_data_df_io(final_smogn_train, int(args.num_inputs))
+    # NOTE: train and test datasets are the same size
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=SEED)
+
+
+    # X, Y, inames, onames = load_data_csv_io(args.data, int(args.num_inputs))
+    # X_train, X_test, Y_train, Y_test = train_test_split(X, Y)
 
     # Apply sampling to training set only
     # CAUTION: Template for testing only.
@@ -176,7 +241,8 @@ if __name__ == '__main__':
     sys.path.append(os.path.dirname(args.superlearner_conf))
     sl_conf = getattr(
         # Second, import the file as a module.  Drop ".py".
-        importlib.import_module(os.path.basename(args.superlearner_conf.replace('.py',''))),
+        # importlib.import_module(os.path.basename(args.superlearner_conf.replace('.py',''))),
+        importlib.import_module(os.path.basename(args.superlearner_conf)),
         'SuperLearnerConf'
     )
 
