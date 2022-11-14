@@ -14,5 +14,5 @@ ${CONDA_PYTHON_EXE} run_workflow.py \
     ${PW_API_KEY} \
     ${PW_USER} \
     gcev2 \
-    ssh_bash_demo \
-    '{"commands|whost": "gcev2.clusters.pw", "commands|rundir": "/var", "commands|runcmd": "ls -a -l -h", "commands|spaces_in_runcmd": "True", "commands|sleep_time": "10", "commands|head_or_worker": "False"}'
+    sl_core \
+    '{"commands|conda_env": "parsl-pw", "commands|remote_dir": "/tmp", "commands|conda_sh": "/tmp/pworks/.miniconda3/etc/profile.d/conda.sh", "commands|n_jobs": "4", "commands|num_inputs": "9", "commands|cross_val_score": "False", "commands|model_dir": "./model_dir", "commands|hpo": "False", "commands|backend": "threading", "commands|sanity_test": "None"}'
