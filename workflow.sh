@@ -24,6 +24,7 @@ set -e
 
 echo " "
 echo "===================================="
+echo Step 1: Local setup (on PW platform)
 echo Execution is in $0 at `date`
 echo " "
 echo Workflow parameters from workflow.xml, apirun/main.py, or ./github/workflows/main.yaml:
@@ -100,10 +101,10 @@ ml_data_repo=$WFP_ml_data_repo
 
 # The full path of the location to which the repo will be
 # on the remote node.
-abs_path_to_repo="/home/${PW_USER}/$(basename $ml_arch_repo)"
+abs_path_to_arch_repo="/home/${PW_USER}/$(basename $ml_arch_repo)"
 
 # Name of remote node
-remote_node=$WFP_whost
+remote_node=${WFP_whost}.clusters.pw
 
 echo Checking inputs to test:
 echo user: $PW_USER
@@ -116,9 +117,47 @@ echo ML code repo: $ml_code_repo
 echo ML data repo: $ml_data_repo
 echo " "
 echo "===================================="
-echo Step 2: Staging files to head node...
-echo "---Git clone repositories..."
+echod Step 2: Cluster setup - staging files to head node
+echo " "
+echo "======> Clone repos to node..."
 
-echo This is a NO-OP workflow - nothing got launched remotely.
+# See detailed comments for what is happening here in:
+# https://github.com/parallelworks/dynamic-learning-rivers/blob/main/test_deploy_key.sh
+
+# ML archive repo must be git cloned with ssh
+# b/c using ssh key for auth.
+ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} git clone ${ml_arch_repo}"
+
+# Other repos can be pulled via HTTPS or SSH.
+ssh ${PW_USER}@${remote_node} git clone ${ml_code_repo}
+ssh ${PW_USER}@${remote_node} git clone ${ml_data_repo}
+
+echo "======> Create and checkout branch..."
+ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch ${ml_arch_branch}"
+ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git checkout ${ml_arch_branch}"
+ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch --set-upstream-to=origin/${ml_arch_branch} ${ml_arch_branch}"
+ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git pull\""
+
+echo "===================================="
+echod Step 3: Launch jobs on cluster
+echo CURRENTLY JUST WRITING A SIMPLE LOG FILE.
+echo INSERT SUPERLEARNER SRUN LAUNCHES HERE
+
+# (Note that this particular repo's .gitignore will ignore filenames
+# that match certain patterns, in particular ".log")
+ssh $user@$remote_node "echo Testing on $(date) >> ${abs_path_to_arch_repo}/ml_models/test.std.out"
+
+echo "===================================="
+echod Step 4: Monitor jobs on cluster
+echo INSERT SQUEUE LISTING CODE FROM SSH_BASH_DEMO
+
+echo "===================================="
+echod Step 5: Stage files back to GitHub
+echo "=====> Add and commit..."
+ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git add --all ."
+ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"Testing deploy key on $(date)\""
+
+echo "=====> Push..."
+ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git push origin ${ml_arch_branch}\""
 
 echo Done!

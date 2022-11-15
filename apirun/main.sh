@@ -15,4 +15,4 @@ ${CONDA_PYTHON_EXE} run_workflow.py \
     ${PW_USER} \
     cloud \
     sl_core \
-    '{"commands|ml_arch_repo": "https://github.com/parallelworks/dynamic-learning-rivers", "commands|ml_arch_branch": "test-branch", "commands|ml_code_repo": "https://github.com/parallelworks/sl_core", "commands|ml_data_repo": "https://github.com/parallelworks/global-river-databases", "whost": "cloud", "commands|n_jobs": "4", "commands|num_inputs": "9", "commands|cross_val_score": "False", "commands|model_dir": "./model_dir", "commands|hpo": "False", "commands|backend": "threading", "commands|sanity_test": "None"}'
+    '{"commands|ml_arch_repo": "git@github.com:parallelworks/dynamic-learning-rivers", "commands|ml_arch_branch": "test-branch", "commands|ml_code_repo": "https://github.com/parallelworks/sl_core", "commands|ml_data_repo": "https://github.com/parallelworks/global-river-databases", "whost": "cloud", "commands|n_jobs": "4", "commands|num_inputs": "9", "commands|cross_val_score": "False", "commands|model_dir": "./model_dir", "commands|hpo": "False", "commands|backend": "threading", "commands|sanity_test": "None"}'
