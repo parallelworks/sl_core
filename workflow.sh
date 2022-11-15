@@ -136,7 +136,7 @@ echo "======> Create ${ml_arch_branch}..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch ${ml_arch_branch}"
 echo "======> Checkout ${ml_arch_branch}..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git checkout ${ml_arch_branch}"
-echo "======> Set upstream branch in case branch exists already ${ml_arch_branch..."
+echo "======> Set upstream branch in case branch exists already ${ml_arch_branch}..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch --set-upstream-to=origin/${ml_arch_branch} ${ml_arch_branch}"
 ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git pull\""
 
