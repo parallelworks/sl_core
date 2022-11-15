@@ -24,7 +24,7 @@ set -e
 
 echo " "
 echo "===================================="
-echo Step 1: Local setup (on PW platform)
+echo Step 1: Local setup on PW platform
 echo Execution is in $0 at `date`
 echo " "
 echo Workflow parameters from workflow.xml, apirun/main.py, or ./github/workflows/main.yaml:
