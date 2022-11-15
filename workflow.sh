@@ -162,4 +162,4 @@ ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"Testing 
 echo "=====> Push..."
 ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git push origin ${ml_arch_branch}\""
 
-echo Done!
+echo Done with $0
