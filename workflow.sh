@@ -100,13 +100,13 @@ ml_data_repo=$WFP_ml_data_repo
 
 # The full path of the location to which the repo will be
 # on the remote node.
-abs_path_to_repo="/home/${user}/$(basename $ml_arch_repo)"
+abs_path_to_repo="/home/${PW_USER}/$(basename $ml_arch_repo)"
 
 # Name of remote node
 remote_node=$WFP_whost
 
 echo Checking inputs to test:
-echo user: $user
+echo user: $PW_USER
 echo remote_node: $remote_node
 echo private_key: $private_key
 echo Checking for private_key: $(ls $private_key)
