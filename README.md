@@ -3,7 +3,25 @@ Core application code for SuperLearner, templates, and documentation.
 
 ## Usage
 
+For testing the usage of the SuperLearner, please start with
+`train_predict_evaluate.sh` which is a wrapper that launches
+the central part of the SuperLearner code `main.py` as well as
+the two post-training operations of making predictions and
+estimating errors, `predict.py` and `errors.py`, respectively.
 
+Broadly, `train_predict_evaluate.sh` is meant to be launched as
+part of a larger workflow that includes syncing machine learning
+code, data, and archives via GitHub and running multiple instances
+of the SuperLearner in parallel.  This workflow is defined by
+`workflow.sh` (the code) and `workflow.xml` which is a "form"
+displayed by the PW platform that allows for users to specify
+workflow parameters and launch the workflow via calls to the PW
+API.  API-launching a workflow is particularly useful when
+integrating the workflow with GitHub actions since the actions
+run as Docker containers on GitHub and can be set up to launch
+PW workflow through the API.  Please see the
+[ML-archive repository](https://github.com/parallelworks/dynamic-learning-rivers) 
+associated with this workflow for more information.
 
 ## Install
 
