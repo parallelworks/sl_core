@@ -20,7 +20,16 @@
 # Exit if any command fails!
 # Sometimes workflow runs fine but there are SSH problems.
 # This line is useful for debugging but can be commented out.
-set -e
+#
+# In particular, the git operations in this workflow
+# **will** fail depending on the situation (i.e. cannot
+# clone to existing repo on cluster, or error due to branch
+# not already present) -> so for the git portions of the
+# workflow to function *as they are* (i.e. without
+# substantial error checking/handling additions and/or
+# clever usage of git that I have not figured out yet)
+# this line **MUST** be commented out.
+#set -e
 
 echo " "
 echo "===================================="
