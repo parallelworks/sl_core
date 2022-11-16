@@ -35,12 +35,19 @@
       </param>
     </section>
     <section name='superlearner' type='section' title='SuperLearner configuration' expanded='true'>
-      <param name='data'
-	     label='Data [.csv] [Inputs, Outputs]'
+      <param name='train_test_data'
+	     label='Data for training and testing [.csv] [Inputs, Outputs]'
 	     type='text'
 	     help='The header contains the parameter names; the inputs must occupy the first columns; path wrt ML archive repo.'
 	     value='input_data/whondrs.csv'
 	     width='50%'>
+      </param>
+      <param name='predict_data'
+             label='Data for predicting [.csv] [Inputs, Outputs]'
+             type='text'
+             help='The header contains the parameter names; only inputs; path wrt ML data repo.'
+             value='input_data/whondrs.csv'
+             width='50%'>
       </param>
       <param name='num_inputs'
 	     label='Number of inputs'
@@ -74,6 +81,26 @@
 	     help='Select yes to run cross-validation on the entire data set'
 	     width='25%_none%'
 	     float='right'>
+      </param>
+      <param name='smogn'
+             type='boolean'
+             truevalue='Yes'
+             falsevalue='No'
+             checked='false'
+             label='Use SMOGN to build synthetic data'
+             help='Select yes to augment training data with synthetic data.'
+             width='25%_none%'
+             float='right'>
+      </param>
+      <param name='onnx'
+             type='boolean'
+             truevalue='Yes'
+             falsevalue='No'
+             checked='false'
+             label='Save SuperLearner models in ONNX format'
+             help='Select yes to save in ONNX format (more portable than .pkl)'
+             width='25%_none%'
+             float='right'>
       </param>
       <param name='backend'
 	     type='select'
