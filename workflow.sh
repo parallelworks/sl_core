@@ -135,7 +135,7 @@ echo "======> Clone repos to node..."
 
 # ML archive repo must be git cloned with ssh
 # b/c using ssh key for auth.
-ssh-agent bash -c "\"ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} git clone ${ml_arch_repo}\""
+ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} git clone ${ml_arch_repo}"
 
 # Other repos can be pulled via HTTPS or SSH.
 ssh ${PW_USER}@${remote_node} git clone ${ml_code_repo}
