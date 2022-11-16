@@ -7,36 +7,31 @@
 	     type='text'
 	     value='git@github.com:parallelworks/dynamic-learning-rivers'
 	     width='50%_none%'
-	     optional='false'
 	     help='Repo MUST have SSH prefix, e.g. git@github.com:org/repo, for SSH auth w/ deploy keys to push'>
       </param>
       <param name='ml_arch_branch'
 	     label='ML archive BRANCH'
 	     type='text'
 	     value='test-branch'
-	     width='50%_node%'
-	     optional='false'>
+	     width='50%_node%'>
       </param>
       <param name='ml_code_repo'
 	     label='ML code repository'
 	     type='text'
 	     value='https://github.com/parallelworks/sl_core'
-	     width='50%_none%'
-	     optional='false'>
+	     width='50%_none%'>
       </param>
       <param name='ml_data_repo'
 	     label='ML data repository'
 	     type='text'
 	     value='https://github.com/parallelworks/global-river-databases'
-	     width='50%_none%'
-	     optional='false'>
+	     width='50%_none%'>
       </param>
       <param name='whost'
 	     label='Workflow host (cluster name)'
 	     type='text'
 	     value='cloud'
-	     width='50%_none%'
-	     optional='false'>
+	     width='50%_none%'>
       </param>
     </section>
     <section name='superlearner' type='section' title='SuperLearner configuration' expanded='true'>
@@ -45,23 +40,20 @@
 	     type='data'
 	     help='The header contains the parameter names and the inputs must occupy the first columns'
 	     format='csv'
-	     width='50%'
-	     optional='false'>
+	     width='50%'>
       </param>
       <param name='num_inputs'
 	     label='Number of inputs'
 	     type='text'
 	     value='9'
-	     width='25%'
-	     optional='false'>
+	     width='25%'>
       </param>
       <param name='superlearner_conf'
 	     label='SuperLearner configuration'
 	     type='data'
 	     help='SuperLearner configuration'
 	     format='py'
-	     width='50%_none%'
-	     optional='false'>
+	     width='50%_none%'>
       </param>
       <param name="hpo"
 	     type="boolean"
@@ -71,7 +63,6 @@
 	     label="Run hyperparameter optimization?"
 	     help='Select yes for hyperparameter tuning'
 	     width="25%"
-	     optional='true'
 	     float="right">
       </param>
       <param name="cross_val_score"
@@ -82,7 +73,6 @@
 	     label="Run cross-validation?"
 	     help='Select yes to run cross-validation on the entire data set'
 	     width="25%_none%"
-	     optional='true'
 	     float="right">
       </param>
       <param name='backend'
@@ -102,15 +92,13 @@
 	     min='1'
 	     max='100'
 	     value='8'
-	     width='25%'
-	     optional='true'>
+	     width='25%'>
       </param>
       <param name='model_dir'
 	     label='Model directory'
 	     type='text'
 	     value='./model_dir'
-	     width='50%'
-	     optional='true'>
+	     width='50%'>
       </param>
     </section>
   </inputs>
