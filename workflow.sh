@@ -113,7 +113,7 @@ ml_data_repo=$WFP_ml_data_repo
 abs_path_to_arch_repo="/home/${PW_USER}/$(basename $ml_arch_repo)"
 
 # Name of remote node
-remote_node=${WFP_whost}.clusters.pw
+remote_node=${WFP_whost}
 
 echo Checking inputs to test:
 echo user: $PW_USER

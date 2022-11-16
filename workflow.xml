@@ -12,7 +12,7 @@
       <param name='ml_arch_branch'
 	     label='ML archive BRANCH'
 	     type='text'
-	     value='test-branch'
+	     value='ModEx-random-add'
 	     width='50%_node%'>
       </param>
       <param name='ml_code_repo'
@@ -30,7 +30,7 @@
       <param name='whost'
 	     label='Workflow host (cluster name)'
 	     type='text'
-	     value='cloud'
+	     value='cloud.clusters.pw'
 	     width='50%_none%'>
       </param>
     </section>
@@ -59,7 +59,7 @@
 	     type='boolean'
 	     truevalue='Yes'
 	     falsevalue='No'
-	     checked='false'
+	     checked='true'
 	     label='Run hyperparameter optimization?'
 	     help='Select yes for hyperparameter tuning'
 	     width='25%_none%'
@@ -91,7 +91,7 @@
 	     type='integer'
 	     min='1'
 	     max='100'
-	     value='4'
+	     value='8'
 	     width='25%'>
       </param>
       <param name='model_dir'
