@@ -55,25 +55,25 @@
 	     format='py'
 	     width='50%_none%'>
       </param>
-      <param name="hpo"
-	     type="boolean"
-	     truevalue="Yes"
-	     falsevalue="No"
-	     checked="false"
-	     label="Run hyperparameter optimization?"
+      <param name='hpo'
+	     type='boolean'
+	     truevalue='Yes'
+	     falsevalue='No'
+	     checked='false'
+	     label='Run hyperparameter optimization?'
 	     help='Select yes for hyperparameter tuning'
-	     width="25%"
-	     float="right">
+	     width='25%_none%'
+	     float='right'>
       </param>
-      <param name="cross_val_score"
-	     type="boolean"
-	     truevalue="Yes"
-	     falsevalue="No"
-	     checked="false"
-	     label="Run cross-validation?"
+      <param name='cross_val_score'
+	     type='boolean'
+	     truevalue='Yes'
+	     falsevalue='No'
+	     checked='false'
+	     label='Run cross-validation?'
 	     help='Select yes to run cross-validation on the entire data set'
-	     width="25%_none%"
-	     float="right">
+	     width='25%_none%'
+	     float='right'>
       </param>
       <param name='backend'
 	     type='select'
@@ -81,10 +81,10 @@
 	     width='50%'
 	     help='Select Backend'
 	     multiple='false'>
-	<option value="loky" >loky</option>
-	<option value="multiprocessing">multiprocessing</option>
-	<option value="threading" selected="true">threading</option>
-	<option value="dask">dask</option>
+	<option value='loky' >loky</option>
+	<option value='multiprocessing'>multiprocessing</option>
+	<option value='threading' selected='true'>threading</option>
+	<option value='dask'>dask</option>
       </param>
       <param name='n_jobs'
 	     label='Number parallel jobs'
