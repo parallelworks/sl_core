@@ -46,7 +46,7 @@
              label='Data for predicting [.csv] [Inputs, Outputs]'
              type='text'
              help='The header contains the parameter names; only inputs; path wrt ML data repo.'
-             value='input_data/whondrs.csv'
+             value='scripts/step_10_output.csv'
              width='50%'>
       </param>
       <param name='num_inputs'

@@ -111,6 +111,8 @@ ml_data_repo=$WFP_ml_data_repo
 # The full path of the location to which the repo will be
 # on the remote node.
 abs_path_to_arch_repo="/home/${PW_USER}/$(basename $ml_arch_repo)"
+abs_path_to_code_repo="/home/${PW_USER}/$(basename $ml_code_repo)"
+abs_path_to_data_repo="/home/${PW_USER}/$(basename $ml_data_repo)"
 
 # Name of remote node
 remote_node=${WFP_whost}
@@ -124,6 +126,11 @@ echo ML archive repo: $ml_arch_repo
 echo ML archive branch: $ml_arch_branch
 echo ML code repo: $ml_code_repo
 echo ML data repo: $ml_data_repo
+echo " "
+echo "Absolute paths on cluster:"
+echo Arch: $abs_path_to_arch_repo
+echo Data: $abs_path_to_data_repo
+echo Code: $abs_path_to_code_repo
 echo " "
 echo "===================================="
 echod Step 2: Cluster setup - staging files to head node
@@ -148,6 +155,15 @@ ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git checkout ${ml_arch_b
 echo "======> Set upstream branch in case branch exists already ${ml_arch_branch}..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch --set-upstream-to=origin/${ml_arch_branch} ${ml_arch_branch}"
 ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git pull\""
+
+echo "======> Test for presence of Conda environment"
+ssh $PW_USER@$remote_node "ls /home/$PW_USER/.miniconda*"
+if [ $? -ne 0 ]; then
+    echo "======> No Conda found; install Conda environment for SuperLearner."
+    ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; create_conda_env.sh"
+else
+    echo "======> Conda found!  Assuming no need to install."
+fi
 
 echo "===================================="
 echod Step 3: Launch jobs on cluster
