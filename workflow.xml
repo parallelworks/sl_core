@@ -40,6 +40,7 @@
 	     type='data'
 	     help='The header contains the parameter names and the inputs must occupy the first columns'
 	     format='csv'
+	     value='sample.csv'
 	     width='50%'>
       </param>
       <param name='num_inputs'
@@ -51,8 +52,9 @@
       <param name='superlearner_conf'
 	     label='SuperLearner configuration'
 	     type='data'
-	     help='SuperLearner configuration'
 	     format='py'
+	     help='SuperLearner configuration'
+	     value='empty.py'
 	     width='50%_none%'>
       </param>
       <param name='hpo'
@@ -81,9 +83,9 @@
 	     width='50%'
 	     help='Select Backend'
 	     multiple='false'>
-	<option value='loky' >loky</option>
+	<option value='loky' selected='true'>loky</option>
 	<option value='multiprocessing'>multiprocessing</option>
-	<option value='threading' selected='true'>threading</option>
+	<option value='threading'>threading</option>
 	<option value='dask'>dask</option>
       </param>
       <param name='n_jobs'
