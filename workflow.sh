@@ -156,7 +156,7 @@ echo INSERT SUPERLEARNER SRUN LAUNCHES HERE
 
 # (Note that this particular repo's .gitignore will ignore filenames
 # that match certain patterns, in particular ".log")
-ssh $user@$remote_node "echo Testing on $(date) >> ${abs_path_to_arch_repo}/ml_models/test.std.out"
+ssh $PW_USER@$remote_node "echo Testing on $(date) >> ${abs_path_to_arch_repo}/ml_models/test.std.out"
 
 echo "===================================="
 echod Step 4: Monitor jobs on cluster
@@ -166,7 +166,7 @@ echo "===================================="
 echod Step 5: Stage files back to GitHub
 echo "=====> Add and commit..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git add --all ."
-ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"Testing deploy key on $(date)\""
+ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"Using deploy key on $(date)\""
 
 echo "=====> Push..."
 ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git push origin ${ml_arch_branch}\""
