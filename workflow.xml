@@ -37,24 +37,22 @@
     <section name='superlearner' type='section' title='SuperLearner configuration' expanded='true'>
       <param name='data'
 	     label='Data [.csv] [Inputs, Outputs]'
-	     type='data'
-	     help='The header contains the parameter names and the inputs must occupy the first columns'
-	     format='csv'
-	     value='sample.csv'
+	     type='text'
+	     help='The header contains the parameter names; the inputs must occupy the first columns; path wrt ML archive repo.'
+	     value='input_data/whondrs.csv'
 	     width='50%'>
       </param>
       <param name='num_inputs'
 	     label='Number of inputs'
 	     type='text'
-	     value='9'
+	     value='25'
 	     width='25%'>
       </param>
       <param name='superlearner_conf'
 	     label='SuperLearner configuration'
-	     type='data'
-	     format='py'
-	     help='SuperLearner configuration'
-	     value='empty.py'
+	     type='text'
+	     help='SuperLearner configuration; path wrt ML code repo'
+	     value='sample_inputs/superlearner_conf_sklearn_NNLS.py'
 	     width='50%_none%'>
       </param>
       <param name='hpo'
