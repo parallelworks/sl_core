@@ -35,6 +35,7 @@
 
 api_launcher=main.sh
 xml_launcher=../workflow.xml
+yml_launcher=../../dynamic-learning-rivers/.github/workflows/main.yml
 
 echo '===================================='
 echo Checking $api_launcher
@@ -46,4 +47,10 @@ echo '===================================='
 echo Checking $xml_launcher
 echo '===================================='
 grep param.name $xml_launcher
+echo ' '
+
+echo '===================================='
+echo Checking $yml_launcher
+echo '===================================='
+grep commands $yml_launcher | sed 's/,/\n/g'
 echo ' '
