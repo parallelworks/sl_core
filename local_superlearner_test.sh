@@ -18,6 +18,11 @@
 miniconda_loc="${HOME}/.miniconda3"
 my_env="sl_onnx"
 
+# Specify the output (working) directory
+# and make it if it does not yet exist.
+work_dir="./sample_outputs/train_predict_eval_output_tmp"
+mkdir -p $work_dir
+
 echo Starting $0
 
 # Check if Conda environment is installed.
@@ -30,10 +35,11 @@ else
     echo "======> Conda found!  Assuming no need to install."
 fi
 
-./train_predict_eval.sh ./sample_inputs/whondrs_25_inputs_train.csv \
+./train_predict_eval.sh \
+    ./sample_inputs/whondrs_25_inputs_train.csv \
     25 \
     ./sample_inputs/superlearner_conf_sklearn_NNLS.py \
-    ./sample_outputs/train_predict_eval_output_tmp \
+    $work_dir \
     $miniconda_loc \
     $my_env \
     True \

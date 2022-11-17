@@ -1,3 +1,4 @@
+#!/bin/bash
 #=====================================
 # SuperLearner launch script
 #=====================================
@@ -51,15 +52,31 @@ my_env=$6
 hpo=$7
 cv=$8
 smogn=$9
-onnx=$10
+onnx=${10}
 
 # HPC options
-num_jobs=$11
-backend=$12
+num_jobs=${11}
+backend=${12}
 
 # Predict options
-predict_var=$13
-predict_data=$14
+predict_var=${13}
+predict_data=${14}
+
+echo Checking command line inputs:
+echo input_data $input_data
+echo num_inputs $num_inputs
+echo sl_conf $sl_conf
+echo work_dir $work_dir
+echo miniconda_loc $miniconda_loc
+echo my_env $my_env
+echo hpo $hpo
+echo cv $cv
+echo smogn $smogn
+echo onnx $onnx
+echo num_jobs $num_jobs
+echo backend $backend
+echo predict_var $predict_var
+echo predict_data $predict_data
 
 #===================================
 # Conda activate and log env
