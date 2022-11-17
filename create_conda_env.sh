@@ -39,7 +39,10 @@
 # doesn't work with "~", so best
 # to put an absolute path here
 # if putting Miniconda in $HOME.
-miniconda_loc="/home/sfgary/.miniconda3"
+#
+# Assuming HOME is a universally
+# accessible location on the cluster.
+miniconda_loc="/home/$(whoami)/.miniconda3"
 
 # Download current version of
 # Miniconda installer

@@ -1,0 +1,134 @@
+<tool id='sl_core' name='sl_core'>
+  <command interpreter='bash'>workflow.sh</command>
+  <inputs>
+    <section name='repos' type='section' title='Repositories, branches, and resources' expanded='true'>
+      <param name='ml_arch_repo'
+	     label='ML archive repository'
+	     type='text'
+	     value='git@github.com:parallelworks/dynamic-learning-rivers'
+	     width='50%_none%'
+	     help='Repo MUST have SSH prefix, e.g. git@github.com:org/repo, for SSH auth w/ deploy keys to push'>
+      </param>
+      <param name='ml_arch_branch'
+	     label='ML archive BRANCH'
+	     type='text'
+	     value='ModEx-random-add'
+	     width='50%_node%'>
+      </param>
+      <param name='ml_code_repo'
+	     label='ML code repository'
+	     type='text'
+	     value='https://github.com/parallelworks/sl_core'
+	     width='50%_none%'>
+      </param>
+      <param name='ml_data_repo'
+	     label='ML data repository'
+	     type='text'
+	     value='https://github.com/parallelworks/global-river-databases'
+	     width='50%_none%'>
+      </param>
+      <param name='whost'
+	     label='Workflow host (cluster name)'
+	     type='text'
+	     value='cloud.clusters.pw'
+	     width='50%_none%'>
+      </param>
+    </section>
+    <section name='superlearner' type='section' title='SuperLearner configuration' expanded='true'>
+      <param name='train_test_data'
+	     label='Data for training and testing [.csv] [Inputs, Outputs]'
+	     type='text'
+	     help='The header contains the parameter names; the inputs must occupy the first columns; path wrt ML archive repo.'
+	     value='input_data/whondrs.csv'
+	     width='50%'>
+      </param>
+      <param name='predict_data'
+             label='Data for predicting [.csv] [Inputs, Outputs]'
+             type='text'
+             help='The header contains the parameter names; only inputs; path wrt ML data repo.'
+             value='scripts/step_10_output.csv'
+             width='50%'>
+      </param>
+      <param name='num_inputs'
+	     label='Number of inputs'
+	     type='text'
+	     value='25'
+	     width='25%'>
+      </param>
+      <param name='superlearner_conf'
+	     label='SuperLearner configuration'
+	     type='text'
+	     help='SuperLearner configuration; path wrt ML code repo'
+	     value='sample_inputs/superlearner_conf_sklearn_NNLS.py'
+	     width='50%_none%'>
+      </param>
+      <param name='hpo'
+	     type='boolean'
+	     truevalue='Yes'
+	     falsevalue='No'
+	     checked='true'
+	     label='Run hyperparameter optimization?'
+	     help='Select yes for hyperparameter tuning'
+	     width='25%_none%'
+	     float='right'>
+      </param>
+      <param name='cross_val_score'
+	     type='boolean'
+	     truevalue='Yes'
+	     falsevalue='No'
+	     checked='false'
+	     label='Run cross-validation?'
+	     help='Select yes to run cross-validation on the entire data set'
+	     width='25%_none%'
+	     float='right'>
+      </param>
+      <param name='smogn'
+             type='boolean'
+             truevalue='Yes'
+             falsevalue='No'
+             checked='false'
+             label='Use SMOGN to build synthetic data'
+             help='Select yes to augment training data with synthetic data.'
+             width='25%_none%'
+             float='right'>
+      </param>
+      <param name='onnx'
+             type='boolean'
+             truevalue='Yes'
+             falsevalue='No'
+             checked='false'
+             label='Save SuperLearner models in ONNX format'
+             help='Select yes to save in ONNX format (more portable than .pkl)'
+             width='25%_none%'
+             float='right'>
+      </param>
+      <param name='backend'
+	     type='select'
+	     label='Joblib backend'
+	     width='50%'
+	     help='Select Backend'
+	     multiple='false'>
+	<option value='loky' selected='true'>loky</option>
+	<option value='multiprocessing'>multiprocessing</option>
+	<option value='threading'>threading</option>
+	<option value='dask'>dask</option>
+      </param>
+      <param name='n_jobs'
+	     label='Number parallel jobs'
+	     type='integer'
+	     min='1'
+	     max='100'
+	     value='8'
+	     width='25%'>
+      </param>
+      <param name='model_dir'
+	     label='Model directory'
+	     type='text'
+	     value='./model_dir'
+	     width='50%'>
+      </param>
+    </section>
+  </inputs>
+  <outputs>
+  </outputs>
+</tool>
