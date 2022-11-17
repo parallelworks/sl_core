@@ -169,6 +169,7 @@ echo "===================================="
 echod Step 3: Launch jobs on cluster
 echo CURRENTLY JUST WRITING A SIMPLE LOG FILE.
 echo INSERT SUPERLEARNER SRUN LAUNCHES HERE
+echo WITH A LOOP LAUNCH OF train_predict_eval.sh
 
 # (Note that this particular repo's .gitignore will ignore filenames
 # that match certain patterns, in particular ".log")

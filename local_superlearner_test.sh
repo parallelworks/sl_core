@@ -18,7 +18,7 @@
 			./sample_inputs/superlearner_conf_sklearn_NNLS.py \
 			./sample_outputs/train_predict_eval_output_tmp \
 			True \
-			False \
+			True \
 			False \
 			False \
 			4 \
