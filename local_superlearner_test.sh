@@ -13,15 +13,36 @@
 #
 #============================
 
+# One place to specify Conda install
+# location for the rest of the pipeline.
+miniconda_loc="${HOME}/.miniconda3"
+my_env="sl_onnx"
+
+echo Starting $0
+
+# Check if Conda environment is installed.
+echo "======> Test for presence of Conda environment"
+ls $miniconda_loc > /dev/null
+if [ $? -ne 0 ]; then
+    echo "======> No Conda found; install Conda environment for SuperLearner."
+    ./create_conda_env.sh $miniconda_loc $my_env
+else
+    echo "======> Conda found!  Assuming no need to install."
+fi
+
 ./train_predict_eval.sh ./sample_inputs/whondrs_25_inputs_train.csv \
-			25 \
-			./sample_inputs/superlearner_conf_sklearn_NNLS.py \
-			./sample_outputs/train_predict_eval_output_tmp \
-			True \
-			True \
-			False \
-			False \
-			4 \
-			loky \
-			rate.mg.per.L.per.h \
-			./sample_inputs/whondrs_25_inputs_predict.csv
+    25 \
+    ./sample_inputs/superlearner_conf_sklearn_NNLS.py \
+    ./sample_outputs/train_predict_eval_output_tmp \
+    $miniconda_loc \
+    $my_env \
+    True \
+    True \
+    False \
+    False \
+    4 \
+    loky \
+    rate.mg.per.L.per.h \
+    ./sample_inputs/whondrs_25_inputs_predict.csv
+
+echo Finished $0

@@ -5,6 +5,11 @@
 # for using with SuperLearner
 # and ONNX.
 #
+# Specify the Conda install location
+# and environment name, e.g.:
+#
+# ./create_conda_env.sh ${HOME}/.miniconda3 sl_onnx
+#
 # Eventually, this script
 # could be run as part of a
 # SL container build.
@@ -34,6 +39,8 @@
 # is compatible.
 #===========================
 
+echo Starting $0
+
 # Miniconda install location
 # The `source` command somehow
 # doesn't work with "~", so best
@@ -42,7 +49,7 @@
 #
 # Assuming HOME is a universally
 # accessible location on the cluster.
-miniconda_loc="/home/$(whoami)/.miniconda3"
+miniconda_loc=$1
 
 # Download current version of
 # Miniconda installer
@@ -56,7 +63,7 @@ chmod u+x ./Miniconda3-latest-Linux-x86_64.sh
 rm ./Miniconda3-latest-Linux-x86_64.sh
 
 # Define environment name
-my_env="sl_onnx"
+my_env=$2
 
 # Define specific versions here
 # or leave blank to use whatever
@@ -111,3 +118,5 @@ conda install -y xgboost${xgboost_version}
 conda install -y -c conda-forge scikit-optimize${sklopt_version}
 conda install -y -c conda-forge onnxmltools
 conda install -y -c conda-forge onnxruntime
+
+echo Finished $0

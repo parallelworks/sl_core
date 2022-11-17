@@ -13,6 +13,8 @@
 #               $NUM_INPUTS
 #               /path/to/sl_conf.py \
 #               /path/to/work_dir \
+#               /path/to/conda_install
+#               $CONDA_ENV_NAME
 #               $HPO_true_or_false \         #-----Bool opts---------
 #               $CV_true_or_false \
 #               $SMOGN_true_or_false \
@@ -41,28 +43,27 @@ sl_conf=$3
 # Define the work dir (where to run and put output)
 work_dir=$4
 
+# Define Conda environment location and name
+miniconda_loc=$5
+my_env=$6
+
 # Workflow boolean options (all either True or False)
-hpo=$5
-cv=$6
-smogn=$7
-onnx=$8
+hpo=$7
+cv=$8
+smogn=$9
+onnx=$10
 
 # HPC options
-num_jobs=$9
-backend=$10
+num_jobs=$11
+backend=$12
 
 # Predict options
-predict_var=$11
-predict_data=$12
+predict_var=$13
+predict_data=$14
 
 #===================================
 # Conda activate and log env
 #===================================
-# Location/name of Conda env is hard
-# coded and assumed to match
-# build_conda_env.sh
-my_env="sl_onnx"
-miniconda_loc="/home/$(whoami)/.miniconda3"
 source ${miniconda_loc}/etc/profile.d/conda.sh
 conda activate $my_env
 conda list -e > ${work_dir}/requirements.txt
