@@ -7,7 +7,7 @@
 echo Start simultaneous_runs.sh
 
 # Specify input file
-input_file="../sample_inputs/whondrml_global_train_25_inputs_update.csv"
+input_file="../sample_inputs/whondrs_25_inputs.csv"
 
 # Need to create working dirs if they don't exist
 workdir1="../sample_outputs/model_test_1"
