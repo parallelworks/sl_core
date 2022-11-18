@@ -121,6 +121,9 @@ remote_node=${WFP_whost}
 miniconda_loc=$(echo $WFP_miniconda_loc | sed "s/__USER__/${PW_USER}/g")
 my_env=$WFP_my_env
 
+# Data paths
+work_dir_base=${WFP_work_dir_base}
+
 echo Checking inputs to test:
 echo user: $PW_USER
 echo remote_node: $remote_node
@@ -140,6 +143,8 @@ echo "Miniconda information:"
 echo Location: $miniconda_loc
 echo Env. name: $my_env
 echo " "
+echo "Data flow information:"
+echo Working dir basename: $work_dir_base
 echo "===================================="
 echod Step 2: Cluster setup - staging files to head node
 echo " "
@@ -186,23 +191,26 @@ echo WITH A LOOP LAUNCH OF train_predict_eval.sh
 ssh $PW_USER@$remote_node "echo Testing on $(date) >> ${abs_path_to_arch_repo}/ml_models/test.std.out"
 
 # Launch a single SuperLearner job
-$work_dir=${abs_path_to_arch_repo}/ml_models/test_tmp
-ssh $PW_USER@$remote_node "mkdir -p ${work_dir}" 
+work_dir=${abs_path_to_arch_repo}/${work_dir_base}
+echo "=======> Creating work dir: ${work_dir}"
+ssh $PW_USER@$remote_node "mkdir -p ${work_dir}"
+
+echo "======> Launching SuperLearner"
 ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; ./train_predict_eval.sh "\
-    "./sample_inputs/whondrs_25_inputs_train.csv "\
-    "25 "\
-    "./sample_inputs/superlearner_conf_sklearn_NNLS.py "\
-    "${work_dir} "\
-    "${miniconda_loc} "\
-    "${my_env} "\
-    "True "\
-    "True "\
-    "False "\
-    "False "\
-    "4 "\
-    "loky "\
-    "rate.mg.per.L.per.h "\
-    "./sample_inputs/whondrs_25_inputs_predict.csv"
+"./sample_inputs/whondrs_25_inputs_train.csv "\
+"25 "\
+"./sample_inputs/superlearner_conf_sklearn_NNLS.py "\
+"${work_dir} "\
+"${miniconda_loc} "\
+"${my_env} "\
+"True "\
+"True "\
+"False "\
+"False "\
+"4 "\
+"loky "\
+"rate.mg.per.L.per.h "\
+"./sample_inputs/whondrs_25_inputs_predict.csv"
 
 echo "===================================="
 echod Step 4: Monitor jobs on cluster

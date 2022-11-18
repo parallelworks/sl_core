@@ -77,6 +77,13 @@
 	     value='sample_inputs/superlearner_conf_sklearn_NNLS.py'
 	     width='50%_none%'>
       </param>
+      <param name='work_dir_base'
+             label='Working directory basename wrt arhcive repo'
+             type='text'
+             value='ml_models/sl_'
+             width='50%'
+	     help='Prefix/base of the location where to store all SL output in the archive repo.'>
+      </param>
       <param name='hpo'
 	     type='boolean'
 	     truevalue='Yes'
@@ -135,12 +142,6 @@
 	     max='100'
 	     value='8'
 	     width='25%'>
-      </param>
-      <param name='model_dir'
-	     label='Model directory'
-	     type='text'
-	     value='./model_dir'
-	     width='50%'>
       </param>
     </section>
   </inputs>
