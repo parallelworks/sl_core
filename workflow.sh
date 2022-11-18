@@ -168,7 +168,7 @@ echo "======> Test for presence of Conda environment"
 ssh $PW_USER@$remote_node "ls /home/$PW_USER/.miniconda*"
 if [ $? -ne 0 ]; then
     echo "======> No Conda found; install Conda environment for SuperLearner."
-    ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; ./create_conda_env.sh"
+    ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; ./create_conda_env.sh ${miniconda_loc} ${my_env}"
 else
     echo "======> Conda found!  Assuming no need to install."
 fi
@@ -182,6 +182,25 @@ echo WITH A LOOP LAUNCH OF train_predict_eval.sh
 # (Note that this particular repo's .gitignore will ignore filenames
 # that match certain patterns, in particular ".log")
 ssh $PW_USER@$remote_node "echo Testing on $(date) >> ${abs_path_to_arch_repo}/ml_models/test.std.out"
+
+# Launch a single SuperLearner job
+$work_dir=${abs_path_to_arch_repo}/ml_models/test_tmp
+ssh $PW_USER@$remote_node "mkdir -p ${work_dir}" 
+ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; ./train_predict_eval.sh "\
+    "./sample_inputs/whondrs_25_inputs_train.csv "\
+    "25 "\
+    "./sample_inputs/superlearner_conf_sklearn_NNLS.py "\
+    "${work_dir} "\
+    "${miniconda_loc} "\
+    "${my_env} "\
+    "True "\
+    "True "\
+    "False "\
+    "False "\
+    "4 "\
+    "loky "\
+    "rate.mg.per.L.per.h "\
+    "./sample_inputs/whondrs_25_inputs_predict.csv"
 
 echo "===================================="
 echod Step 4: Monitor jobs on cluster
