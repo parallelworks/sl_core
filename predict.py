@@ -51,12 +51,14 @@ if __name__ == '__main__':
     
     # The following only works for the scipy.optimize.nnls
     # stacking regressor, not the sklearn stacking regressors.
-    print(superlearner[predict_var].final_estimator_.weights_)
+    #print(superlearner[predict_var].final_estimator_.weights_)
 
     #===========================================================
     # Load the train and test data to make plot and estimate
     # prediction errors.
     #===========================================================
+    num_inputs = int(args.num_inputs)
+
     train_df = pd.read_csv(model_dir+'/train.csv').astype(np.float32)
     X_train = train_df.values[:, :num_inputs]
     Y_train = train_df.values[:, num_inputs:]
@@ -64,7 +66,11 @@ if __name__ == '__main__':
     test_df = pd.read_csv(model_dir+'/test.csv').astype(np.float32)
     X_test = test_df.values[:, :num_inputs]
     Y_test = test_df.values[:, num_inputs:]
-
+    
+    all_df = pd.concat((train_df,test_df),axis=0)
+    X_all = all_df.values[:, :num_inputs]
+    Y_all = all_df.values[:, num_inputs:]
+    
     #===========================================================
     # Make some predictions with the testing data
     #===========================================================
@@ -96,7 +102,11 @@ if __name__ == '__main__':
     y_bar = np.mean(Y_hat_test)
     ssxx = np.sum((np.squeeze(Y_test)-np.mean(Y_test))**2)
     ssyy = np.sum((np.squeeze(Y_hat_test)-np.mean(Y_hat_test))**2)
+    ssxy = np.sum((np.squeeze(Y_hat_test)-np.mean(Y_hat_test))*(np.squeeze(Y_test)-np.mean(Y_test)))
     
+    # Root squared errors
+    rse = np.sqrt((np.squeeze(Y_test)-Y_hat_test)**2)
+
     # When trying to predict error based on Y_hat,
     # the sse_error = sum((error_i - mean(error))^2)
     # which when expanded algebreically
@@ -193,7 +203,7 @@ if __name__ == '__main__':
     # Put the predictions with lon lat data separated beforehand.
     output_df = pd.read_csv(args.predict_data+'.ixy')
         
-    output_df[target_name] = pd.Series(Y_predict)
+    output_df[args.predict_var] = pd.Series(Y_predict)
     output_df['mean.error'] = pd.Series(Y_hat_error)
     output_df['predict.error'] = pd.Series(Y_hat_pred_error)
     #WORKING HERE - add the pca_dist, and combined metric
