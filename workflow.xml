@@ -1,7 +1,7 @@
 <tool id='sl_core' name='sl_core'>
   <command interpreter='bash'>workflow.sh</command>
   <inputs>
-    <section name='repos' type='section' title='Repositories, branches, and resources' expanded='true'>
+    <section name='repos' type='section' title='Repositories, branches, resources, and environments' expanded='true'>
       <param name='ml_arch_repo'
 	     label='ML archive repository'
 	     type='text'
@@ -32,6 +32,19 @@
 	     type='text'
 	     value='cloud.clusters.pw'
 	     width='50%_none%'>
+      </param>
+      <param name='miniconda_loc'
+	     label='Location (prefix) of Miniconda installation'
+	     type='text'
+	     value='/home/${PW_USER}/.miniconda3'
+	     width='50%_none%'>
+      </param>
+      <param name='my_env'
+	     label='Name of Miniconda environment'
+	     type='text'
+	     value='superlearner'
+	     width='50%_none%'
+	     help='Specify name of Miniconda environment to use. There is a bug with using base!'>
       </param>
     </section>
     <section name='superlearner' type='section' title='SuperLearner configuration' expanded='true'>

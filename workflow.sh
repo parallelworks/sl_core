@@ -117,6 +117,10 @@ abs_path_to_data_repo="/home/${PW_USER}/$(basename $ml_data_repo)"
 # Name of remote node
 remote_node=${WFP_whost}
 
+# Conda environment information
+miniconda_loc=$WFP_miniconda_loc
+my_env=$WFP_my_env
+
 echo Checking inputs to test:
 echo user: $PW_USER
 echo remote_node: $remote_node
@@ -131,6 +135,10 @@ echo "Absolute paths on cluster:"
 echo Arch: $abs_path_to_arch_repo
 echo Data: $abs_path_to_data_repo
 echo Code: $abs_path_to_code_repo
+echo " "
+echo "Miniconda information:"
+echo Location: $miniconda_loc
+echo Env. name: $my_env
 echo " "
 echo "===================================="
 echod Step 2: Cluster setup - staging files to head node
