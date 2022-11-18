@@ -175,7 +175,9 @@ if [ $? -ne 0 ]; then
     echo "======> No Conda found; install Conda environment for SuperLearner."
     # Redirect std output from this process
     # to a separate log file.
-    ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; ./create_conda_env.sh ${miniconda_loc} ${my_env}" > miniconda_install.log
+    echod This process can take several minutes.
+    echod See miniconda_install.log for progress.
+    ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; ./create_conda_env.sh ${miniconda_loc} ${my_env}" &> miniconda_install.log
 else
     echo "======> Conda found!  Assuming no need to install."
 fi
