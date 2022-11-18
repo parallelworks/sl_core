@@ -182,6 +182,12 @@ else
     echo "======> Conda found!  Assuming no need to install."
 fi
 
+# Ensure Conda install is done before proceeding
+# This is necessary because stdout and stderr
+# in the Conda intall process are redirected
+# elsewhere.
+wait
+
 echo "===================================="
 echod Step 3: Launch jobs on cluster
 echo CURRENTLY JUST WRITING A SIMPLE LOG FILE.
