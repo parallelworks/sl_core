@@ -204,9 +204,13 @@ echo "=======> Creating work dir: ${work_dir}"
 ssh $PW_USER@$remote_node "mkdir -p ${work_dir}"
 
 echo "======> Launching SuperLearner"
-ssh -f ${ssh_options} $PW_USER@$remote_node sbatch \
---output=sl.std.out.${remote_node}
---wrap "\"cd ${abs_path_to_code_repo}; ./train_predict_eval.sh "\
+# This launch line can be split over multiple
+# lines for readability BUT no spaces are allowed
+# outside of " " or the interpreter will assume it's
+# the end of the command.
+ssh -f ${ssh_options} $PW_USER@$remote_node sbatch" "\
+--output=sl.std.out.${remote_node}" "\
+--wrap" ""\"cd ${abs_path_to_code_repo}; ./train_predict_eval.sh "\
 "./sample_inputs/whondrs_25_inputs_train.csv "\
 "25 "\
 "./sample_inputs/superlearner_conf_sklearn_NNLS.py "\
