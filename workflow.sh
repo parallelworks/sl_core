@@ -198,7 +198,9 @@ echo "=======> Creating work dir: ${work_dir}"
 ssh $PW_USER@$remote_node "mkdir -p ${work_dir}"
 
 echo "======> Launching SuperLearner"
-ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; ./train_predict_eval.sh "\
+ssh -f ${ssh_options} $PW_USER@$remote_node sbatch \
+--output=sl.std.out.${remote_node}
+--wrap "\"cd ${abs_path_to_code_repo}; ./train_predict_eval.sh "\
 "./sample_inputs/whondrs_25_inputs_train.csv "\
 "25 "\
 "./sample_inputs/superlearner_conf_sklearn_NNLS.py "\
@@ -212,19 +214,41 @@ ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; ./train_predict_eval.sh 
 "4 "\
 "loky "\
 "rate.mg.per.L.per.h "\
-"./sample_inputs/whondrs_25_inputs_predict.csv"
+"./sample_inputs/whondrs_25_inputs_predict.csv""\""
 
 echo "===================================="
 echod Step 4: Monitor jobs on cluster
-echo INSERT SQUEUE LISTING CODE FROM SSH_BASH_DEMO
 
+# Check if there are any other running jobs on the cluster
+# by counting the number of lines in squeue output. One
+# line is the header line => no jobs are running.  Anything
+# more than 1 means that there is at least one job running.
+n_squeue="2"
+squeue_wait=10
+while [ $n_squeue -gt 1 ]
+do
+    n_squeue=$(ssh ${ssh_options} $PW_USER@$remote_node squeue | wc -l )
+    echod "Found "${n_squeue}" lines in squeue."
+    echod "Will wait "${squeue_wait}" seconds."
+    sleep $squeue_wait
+done
+echod "No more pending jobs in squeue."
+    
 echo "===================================="
 echod Step 5: Stage files back to GitHub
 echo "=====> Add and commit..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git add --all ."
-ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"Using deploy key on $(date)\""
+ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"${jobnum} on $(date)\""
 
 echo "=====> Push..."
 ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git push origin ${ml_arch_branch}\""
+
+echo "======> Stage files back to PW"
+# Although it is duplicating data, this
+# step will make it easier to loop over a
+# series of job directories for consolidating
+# results rather than having to loop through
+# git commits.
+rsync $PW_USER@$remote_node:${abs_path_to_arch_repo}/ml_models ./
 
 echo Done with $0
