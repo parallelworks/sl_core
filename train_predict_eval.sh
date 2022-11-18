@@ -83,7 +83,17 @@ echo predict_data $predict_data
 #===================================
 source ${miniconda_loc}/etc/profile.d/conda.sh
 conda activate $my_env
-conda list -e > ${work_dir}/requirements.txt
+# Save Conda env setup and zip the file
+# because we don't want GH Dependabot to
+# interpret it as the repo's actual
+# requirements since this environment is
+# emphemeral (otherwise, GH may detect
+# security risks in packages and send lots
+# of warnings). The HPC code in this Conda
+# environment is being executed entirely
+# within the environment of the cluster and
+# is not exposed to the outside world.
+conda list -e | gzip -1c > ${work_dir}/requirements.txt.gz
 
 #===================================
 # Run the SuperLearner
