@@ -81,8 +81,8 @@
              label='Working directory basename wrt arhcive repo'
              type='text'
              value='ml_models/sl_'
-             width='50%'
-	     help='Prefix/base of the location where to store all SL output in the archive repo.'>
+             width='50%_none%'
+	     help='Prefix/base of the location where to store all SL output in the archive repo. Test!'>
       </param>
       <param name='hpo'
 	     type='boolean'
