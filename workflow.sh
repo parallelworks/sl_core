@@ -118,7 +118,7 @@ abs_path_to_data_repo="/home/${PW_USER}/$(basename $ml_data_repo)"
 remote_node=${WFP_whost}
 
 # Conda environment information
-miniconda_loc=$WFP_miniconda_loc
+miniconda_loc=$(echo $WFP_miniconda_loc | sed "s/__USER__/${PW_USER}/g")
 my_env=$WFP_my_env
 
 echo Checking inputs to test:

@@ -31,13 +31,15 @@
 	     label='Workflow host (cluster name)'
 	     type='text'
 	     value='cloud.clusters.pw'
-	     width='50%_none%'>
+	     width='50%_none%'
+	     help='Name of cluster to run on.'>
       </param>
       <param name='miniconda_loc'
 	     label='Location (prefix) of Miniconda installation'
 	     type='text'
-	     value='/home/${PW_USER}/.miniconda3'
-	     width='50%_none%'>
+	     value='/home/__USER__/.miniconda3'
+	     width='50%_none%'
+	     help='Location of miniconda on cluster.  __USER__ is auto substituted.'>
       </param>
       <param name='my_env'
 	     label='Name of Miniconda environment'
