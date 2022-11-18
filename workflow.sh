@@ -237,13 +237,15 @@ n_squeue="2"
 squeue_wait=10
 while [ $n_squeue -gt 1 ]
 do
+    # Wait first - sbatch launches may take
+    # a few seconds to register on squeue!
+    echod "Monitor waiting "${squeue_wait}" seconds..."
+    sleep $squeue_wait
     n_squeue=$(ssh ${ssh_options} $PW_USER@$remote_node squeue | wc -l )
     echod "Found "${n_squeue}" lines in squeue."
-    echod "Will wait "${squeue_wait}" seconds."
-    sleep $squeue_wait
 done
 echod "No more pending jobs in squeue."
-    
+
 echo "===================================="
 echod Step 5: Stage files back to GitHub
 echo "=====> Add and commit..."
