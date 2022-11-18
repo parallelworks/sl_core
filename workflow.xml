@@ -61,7 +61,7 @@
              label='Data for predicting [.csv] [Inputs, Outputs]'
              type='text'
              help='The header contains the parameter names; only inputs; path wrt ML data repo.'
-             value='scripts/step_10_output.csv'
+             value='scripts/WH_RA_GL_global_predict_25_inputs'
              width='50%'>
       </param>
       <param name='num_inputs'
@@ -74,7 +74,7 @@
 	     label='SuperLearner configuration'
 	     type='text'
 	     help='SuperLearner configuration; path wrt ML code repo'
-	     value='sample_inputs/superlearner_conf_sklearn_NNLS.py'
+	     value='sample_inputs/superlearner_conf.py'
 	     width='50%_none%'>
       </param>
       <param name='work_dir_base'

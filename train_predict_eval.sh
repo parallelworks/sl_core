@@ -23,7 +23,7 @@
 #               $NUM_JOBS \                  #-----HPC opts----------
 #               $BACKEND \
 #               $PREDICT_VAR \               #-----Predict opts------
-#               /path/to/predict_data.csv
+#               /path/to/predict_data
 #====================================
 
 echo Starting $0
@@ -114,7 +114,10 @@ python -m main \
 # model and make predictions
 #===================================
 
-# WORKING HERE
+python -m predict \
+       --model_dir ${work_dir} \
+       --predict_var ${predict_var} \
+       --predict_data ${predict_data}
 
 #===================================
 # Run PCA on predictions
@@ -127,8 +130,8 @@ python -m main \
 #===================================
 
 cd $work_dir
-# WORKING HERE
 ls
+#WORKING HERE
 
 #===================================
 echo $0 finished!
