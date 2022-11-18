@@ -188,6 +188,8 @@ if __name__ == '__main__':
     #===========================================================
     # Write output file
     #===========================================================
+    predict_output_file = model_dir+"/sl_predictions.csv"
+    
     # Put the predictions with lon lat data separated beforehand.
     output_df = pd.read_csv(args.predict_data+'.ixy')
         
@@ -196,7 +198,7 @@ if __name__ == '__main__':
     output_df['predict.error'] = pd.Series(Y_hat_pred_error)
     #WORKING HERE - add the pca_dist, and combined metric
     output_df.to_csv(
-        predict_out_file,
+        predict_output_file,
         index=False,
         na_rep='NaN')
 
