@@ -107,7 +107,7 @@ python -m main \
        --model_dir ${work_dir} \
        --hpo $hpo \
        --data ${input_data} \
-       --backend $backend 1> ${work_dir}/std.out 2> ${work_dir}/std.err
+       --backend $backend 1> ${work_dir}/train.std.out 2> ${work_dir}/train.std.err
 
 #===================================
 # Print out information about the
@@ -117,7 +117,7 @@ python -m main \
 python -m predict \
        --model_dir ${work_dir} \
        --predict_var ${predict_var} \
-       --predict_data ${predict_data}
+       --predict_data ${predict_data} 1> ${work_dir}/predict.std.out 2> ${work_dir}/predict.std.err
 
 #===================================
 # Run PCA on predictions
