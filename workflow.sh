@@ -244,7 +244,9 @@ do
     n_squeue=$(ssh ${ssh_options} $PW_USER@$remote_node squeue | wc -l )
     echod "Found "${n_squeue}" lines in squeue."
 done
-echod "No more pending jobs in squeue."
+echod "No more pending jobs in squeue. Stage SLURM logs back."
+rsync $PW_USER@$remote_node:/home/$PW_USER/sl.std.out.${remote_node} ./
+
 
 echo "===================================="
 echod Step 5: Stage files back to GitHub
