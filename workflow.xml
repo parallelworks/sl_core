@@ -78,7 +78,7 @@
 	     width='50%_none%'>
       </param>
       <param name='work_dir_base'
-             label='Working directory basename wrt arhcive repo'
+             label='Working directory basename wrt archive repo'
              type='text'
              value='ml_models/sl_'
              width='50%_none%'
