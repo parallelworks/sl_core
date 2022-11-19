@@ -41,6 +41,12 @@ if __name__ == '__main__':
     # Load the SuperLearner models
     #===========================================================
     model_dir = args.model_dir
+    train_data = model_dir+'/train.csv'
+    test_data = model_dir+'/test.csv'
+    predict_data_csv = model_dir+'/'+args.predict_data+'.csv'
+    predict_data_ixy = model_dir+'/'+args.predict_data+'.ixy'
+    predict_output_file = model_dir+'/'+args.predict_output
+    
     sys.path.append(model_dir)
     # Insert an extra slash just in case missing on command line
     with open(model_dir+"/"+'SuperLearners.pkl','rb') as file_object:
@@ -62,11 +68,11 @@ if __name__ == '__main__':
     #===========================================================
     num_inputs = int(args.num_inputs)
 
-    train_df = pd.read_csv(model_dir+'/train.csv').astype(np.float32)
+    train_df = pd.read_csv(train_data).astype(np.float32)
     X_train = train_df.values[:, :num_inputs]
     Y_train = train_df.values[:, num_inputs:]
 
-    test_df = pd.read_csv(model_dir+'/test.csv').astype(np.float32)
+    test_df = pd.read_csv(test_data).astype(np.float32)
     X_test = test_df.values[:, :num_inputs]
     Y_test = test_df.values[:, num_inputs:]
     
@@ -77,8 +83,8 @@ if __name__ == '__main__':
     #===========================================================
     # Make some predictions with the testing data
     #===========================================================
-    Y_hat_train = superlearner['rate.mg.per.L.per.h'].predict(X_train)
-    Y_hat_test = superlearner['rate.mg.per.L.per.h'].predict(X_test)
+    Y_hat_train = superlearner[predict_var].predict(X_train)
+    Y_hat_test = superlearner[predict_var].predict(X_test)
 
     # Compute line of best fit between testing and training targets
     test_line = np.polynomial.polynomial.Polynomial.fit(
@@ -181,12 +187,11 @@ if __name__ == '__main__':
     #===========================================================
     # Make predictions with a large data set
     #===========================================================
-    predict_df = pd.read_csv(
-        args.predict_data+'.csv').astype(np.float32)
+    predict_df = pd.read_csv(predict_data_csv).astype(np.float32)
     predict_df.fillna(predict_df.mean(),inplace=True)
     X = predict_df.values
     
-    Y_predict = superlearner['rate.mg.per.L.per.h'].predict(X)
+    Y_predict = superlearner[predict_var].predict(X)
     
     # Estimate the error based on the training data
     Y_hat_error = 2*s*np.sqrt((1/n_sample_size) + ((np.squeeze(Y_predict)-np.mean(Y_test))**2)/ssxx)
@@ -195,15 +200,13 @@ if __name__ == '__main__':
     #===========================================================
     # Write output file
     #===========================================================
-    predict_output_file = model_dir+"/sl_predictions.csv"
     
     # Put the predictions with lon lat data separated beforehand.
-    output_df = pd.read_csv(args.predict_data+'.ixy')
+    output_df = pd.read_csv(predict_data_ixy)
         
-    output_df[args.predict_var] = pd.Series(Y_predict)
+    output_df[predict_var] = pd.Series(Y_predict)
     output_df['mean.error'] = pd.Series(Y_hat_error)
     output_df['predict.error'] = pd.Series(Y_hat_pred_error)
-    #WORKING HERE - add the pca_dist, and combined metric
     output_df.to_csv(
         predict_output_file,
         index=False,

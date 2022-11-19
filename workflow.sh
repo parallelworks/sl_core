@@ -211,9 +211,9 @@ echo "======> Launching SuperLearner"
 ssh -f ${ssh_options} $PW_USER@$remote_node sbatch" "\
 --output=sl.std.out.${remote_node}" "\
 --wrap" ""\"cd ${abs_path_to_code_repo}; ./train_predict_eval.sh "\
-"./sample_inputs/whondrs_25_inputs_train.csv "\
-"25 "\
-"./sample_inputs/superlearner_conf_sklearn_NNLS.py "\
+"${abs_path_to_arch_repo}/${WFP_train_test_data} "\
+"${WFP_num_inputs} "\
+"${abs_path_to_code_repo}/${WFP_superlearner_conf} "\
 "${work_dir} "\
 "${miniconda_loc} "\
 "${my_env} "\
@@ -224,7 +224,7 @@ ssh -f ${ssh_options} $PW_USER@$remote_node sbatch" "\
 "4 "\
 "loky "\
 "rate.mg.per.L.per.h "\
-"./sample_inputs/whondrs_25_inputs_predict.csv""\""
+"${abs_path_to_data_repo}/${WFP_predict_data}""\""
 
 echo "===================================="
 echod Step 4: Monitor jobs on cluster
