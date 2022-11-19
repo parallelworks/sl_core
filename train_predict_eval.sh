@@ -117,6 +117,7 @@ python -m main \
 python -m predict \
        --model_dir ${work_dir} \
        --predict_var ${predict_var} \
+       --num_inputs 25 \
        --predict_data ${predict_data} 1> ${work_dir}/predict.std.out 2> ${work_dir}/predict.std.err
 
 #===================================

@@ -13,6 +13,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 from sklearn.utils import shuffle
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MaxAbsScaler
 import sys
 from pprint import pprint
 
@@ -188,12 +191,6 @@ if __name__ == '__main__':
     # Estimate the error based on the training data
     Y_hat_error = 2*s*np.sqrt((1/n_sample_size) + ((np.squeeze(Y_predict)-np.mean(Y_test))**2)/ssxx)
     Y_hat_pred_error = 2*s*np.sqrt(1+(1/n_sample_size) + ((np.squeeze(Y_predict)-np.mean(Y_test))**2)/ssxx)
-    
-    #===========================================================
-    # Apply PCA to the data to rank which data are most different
-    #===========================================================
-
-    # WORKING HERE
     
     #===========================================================
     # Write output file
