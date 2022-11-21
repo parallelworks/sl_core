@@ -124,8 +124,8 @@ my_env=$WFP_my_env
 # Data paths
 work_dir_base=${WFP_work_dir_base}
 
-# Number of iterations
-export WFP_num_iter=5
+# Number of instances
+export WFP_num_inst=10
 
 echo Checking inputs to test:
 echo user: $PW_USER
@@ -149,8 +149,8 @@ echo " "
 echo "Data flow information:"
 echo Working dir basename: $work_dir_base
 echo " "
-echo "Number of iterations"
-echo num_iter: $WFP_num_iter
+echo "Number of instances"
+echo num_inst: $WFP_num_inst
 echo "===================================="
 echod Step 2: Cluster setup - staging files to head node
 echo " "
@@ -206,7 +206,7 @@ wait
 echo "===================================="
 echod Step 3: Launch jobs on cluster
 
-for (( ii=0; ii<$WFP_num_iter; ii++ ))
+for (( ii=0; ii<$WFP_num_inst; ii++ ))
 do
 # Launch a single SuperLearner job
 work_dir=${abs_path_to_arch_repo}/${work_dir_base}${ii}
