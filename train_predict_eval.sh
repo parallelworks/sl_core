@@ -128,6 +128,7 @@ python -m pca \
        --model_dir ${work_dir} \
        --num_inputs 25 \
        --data ${input_data} \
+       --predict_var ${predict_var} \
        --predict_data ${predict_data} 1> ${work_dir}/pca.std.out 2> ${work_dir}/pca.std.err
 
 #===================================
