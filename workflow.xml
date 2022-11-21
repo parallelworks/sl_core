@@ -54,7 +54,7 @@
 	     label='Data for training and testing [.csv] [Inputs, Outputs]'
 	     type='text'
 	     help='The header contains the parameter names; the inputs must occupy the first columns; path wrt ML archive repo.'
-	     value='input_data/whondrs.csv'
+	     value='input_data/whondrs_25_inputs_train.csv'
 	     width='50%'>
       </param>
       <param name='predict_data'
