@@ -148,6 +148,15 @@ if __name__ == '__main__':
     ax.grid()
     plt.savefig(model_dir+'/sl_error.png')
     
+    # Print out correlations between the various error estimates:
+    print("RSE: "+str(np.mean(rse))+" +/- "+str(np.std(rse)))
+    print("mean.error: "+str(np.mean(s_y))+" +/- "+str(np.std(s_y)))
+    print("predict.error: "+str(np.mean(s_p))+" +/- "+str(np.std(s_p)))
+    
+    print("RSE vs mean.error: "+str(np.corrcoef(rse,s_y)))
+    print("RSE vs predict.error: "+str(np.corrcoef(rse,s_p)))
+    print("RSE vs s: "+str(np.corrcoef(rse,s*np.ones(np.shape(Y_test)))))
+    
     #===========================================================
     # Make an evaluation plot
     #===========================================================
