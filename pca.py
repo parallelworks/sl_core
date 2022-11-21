@@ -52,8 +52,19 @@ if __name__ == '__main__':
     #===========================================================
     num_inputs = int(args.num_inputs)
     model_dir = args.model_dir
-    predict_data = model_dir+'/'+args.predict_data
-    predict_output = model_dir+'/'+args.predict_output
-    pca_output = model_dir+"sl_pca.csv"
+    train_test_data = args.data
+    predict_data = args.predict_data
+
+    # We know that the previous SuperLearner steps have
+    # also generated the following files:
+    predict_output = args.model_dir+"/sl_predictions.csv"
+    
+    # Finally, we output a final file that coalesces
+    # all **available** sites for prediction and PCA
+    # (any sites with NaN must be dropped from PCA)
+    # That includes site ID, lon, lat, predicted
+    # value, error metric, PCA dist, normalized
+    # error, normalized PCA dist, and combined metric.
+    pca_output = model_dir+"/sl_pca.csv"
 
 print("Done!")

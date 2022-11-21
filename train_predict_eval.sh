@@ -62,9 +62,6 @@ backend=${12}
 predict_var=${13}
 predict_data=${14}
 
-# Relative to the work_dir
-predict_output=sl_predictions.csv
-
 echo Checking command line inputs:
 echo input_data $input_data
 echo num_inputs $num_inputs
@@ -130,6 +127,7 @@ python -m predict \
 python -m pca \
        --model_dir ${work_dir} \
        --num_inputs 25 \
+       --data ${input_data} \
        --predict_data ${predict_data} 1> ${work_dir}/pca.std.out 2> ${work_dir}/pca.std.err
 
 #===================================

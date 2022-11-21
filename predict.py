@@ -41,11 +41,14 @@ if __name__ == '__main__':
     # Load the SuperLearner models
     #===========================================================
     model_dir = args.model_dir
+
+    # SuperLearner main.py always saves these files in model_dir:
     train_data = model_dir+'/train.csv'
     test_data = model_dir+'/test.csv'
-    predict_data_csv = model_dir+'/'+args.predict_data+'.csv'
-    predict_data_ixy = model_dir+'/'+args.predict_data+'.ixy'
-    predict_output_file = model_dir+'/'+args.predict_output
+
+    predict_data_csv = args.predict_data+'.csv'
+    predict_data_ixy = args.predict_data+'.ixy'
+    predict_output_file = model_dir+"/sl_predictions.csv"
     
     sys.path.append(model_dir)
     # Insert an extra slash just in case missing on command line
@@ -60,7 +63,7 @@ if __name__ == '__main__':
     
     # The following only works for the scipy.optimize.nnls
     # stacking regressor, not the sklearn stacking regressors.
-    #print(superlearner[predict_var].final_estimator_.weights_)
+    print(superlearner[predict_var].final_estimator_.weights_)
 
     #===========================================================
     # Load the train and test data to make plot and estimate
