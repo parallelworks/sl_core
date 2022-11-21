@@ -21,6 +21,7 @@ from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MaxAbsScaler
+from numpy.testing import assert_array_almost_equal
 import sys
 from pprint import pprint
 
