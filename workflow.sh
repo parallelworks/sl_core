@@ -167,6 +167,15 @@ ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"da
 ssh ${PW_USER}@${remote_node} git clone ${ml_code_repo}
 ssh ${PW_USER}@${remote_node} git clone ${ml_data_repo}
 
+# Force other repos to pull, too.  The clone (above)
+# may fail if the repo already exists (i.e. a cluster
+# is being used again to run the workflow again). However,
+# in that case, it is essential that the repos pull in
+# any new updates (because the clone failed, so nothing
+# new was pulled).
+ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; git pull"
+ssh $PW_USER@$remote_node "cd ${abs_path_to_data_repo}; git pull"
+
 echo "======> Create ${ml_arch_branch}..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch ${ml_arch_branch}"
 echo "======> Checkout ${ml_arch_branch}..."
