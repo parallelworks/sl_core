@@ -263,6 +263,6 @@ echo "======> Stage files back to PW"
 # series of job directories for consolidating
 # results rather than having to loop through
 # git commits.
-rsync $PW_USER@$remote_node:${abs_path_to_arch_repo}/ml_models ./
+rsync -av $PW_USER@$remote_node:${abs_path_to_arch_repo}/ml_models ./
 
 echo Done with $0
