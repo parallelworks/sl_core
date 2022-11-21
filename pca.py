@@ -81,7 +81,7 @@ if __name__ == '__main__':
     predict_targets = pd.read_csv(predict_output)
     
     # Check that the same number of sites are in both files
-    print('Shapes at start in '+predict_inputs+' and '+predict_targets+':')
+    print('Shapes at start:')
     print(predict_inputs.shape)
     print(predict_targets.shape)
     

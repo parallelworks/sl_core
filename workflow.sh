@@ -124,6 +124,9 @@ my_env=$WFP_my_env
 # Data paths
 work_dir_base=${WFP_work_dir_base}
 
+# Number of iterations
+export WFP_num_iter=5
+
 echo Checking inputs to test:
 echo user: $PW_USER
 echo remote_node: $remote_node
@@ -145,6 +148,9 @@ echo Env. name: $my_env
 echo " "
 echo "Data flow information:"
 echo Working dir basename: $work_dir_base
+echo " "
+echo "Number of iterations"
+echo num_iter: $WFP_num_iter
 echo "===================================="
 echod Step 2: Cluster setup - staging files to head node
 echo " "
@@ -190,16 +196,11 @@ wait
 
 echo "===================================="
 echod Step 3: Launch jobs on cluster
-echo CURRENTLY JUST WRITING A SIMPLE LOG FILE.
-echo INSERT SUPERLEARNER SRUN LAUNCHES HERE
-echo WITH A LOOP LAUNCH OF train_predict_eval.sh
 
-# (Note that this particular repo's .gitignore will ignore filenames
-# that match certain patterns, in particular ".log")
-ssh $PW_USER@$remote_node "echo Testing on $(date) >> ${abs_path_to_arch_repo}/ml_models/test.std.out"
-
+for (( ii=0; ii<$WFP_num_iter; ii++ ))
+do
 # Launch a single SuperLearner job
-work_dir=${abs_path_to_arch_repo}/${work_dir_base}
+work_dir=${abs_path_to_arch_repo}/${work_dir_base}${ii}
 echo "=======> Creating work dir: ${work_dir}"
 ssh $PW_USER@$remote_node "mkdir -p ${work_dir}"
 
@@ -225,6 +226,7 @@ ssh -f ${ssh_options} $PW_USER@$remote_node sbatch" "\
 "${WFP_backend} "\
 "rate.mg.per.L.per.h "\
 "${abs_path_to_data_repo}/${WFP_predict_data}""\""
+done
 
 echo "===================================="
 echod Step 4: Monitor jobs on cluster
