@@ -72,7 +72,7 @@ if __name__ == '__main__':
     # Load files with Pandas and remove NaN
     #======================================
     # Load the features used to predict respiration rates:
-    predict_inputs = pd.read_csv(predict_data)
+    predict_inputs = pd.read_csv(predict_data+".csv")
     
     # Load the predicted respiration rates.  Store lon, lat, mean.error,
     # and predict.error for later. This information is only needed
@@ -168,6 +168,13 @@ if __name__ == '__main__':
     # We do not want the ID to be part of the PCA,
     # so pull it out now and concatenate it later as needed.
     id_df = pd.DataFrame(data_all.pop('GL_id'),columns=pd.Index(['GL_id']))
+
+    # Finally, the training data did not have an ID but it does
+    # have quite a few NaN in it.  Overwrite those NaN with mean
+    # values (as done for the training) and save the dataframe
+    # so we can estimate the PCA-distance for each datapoint in
+    # the training set, separately.
+    training_all.fillna(training_df.mean(), inplace = True)
     
     #========================================
     # Scale data before PCA
@@ -176,12 +183,14 @@ if __name__ == '__main__':
     cnsd = StandardScaler()
     cnsd.fit(data_all)
     data_all_scaled = cnsd.transform(data_all)
+    training_all_scaled = cnsd.transform(training_all)
     
     # Can you recover the data from the scaler?  Yes!
     assert_array_almost_equal(data_all, cnsd.inverse_transform(data_all_scaled),decimal=6)
     
     # So overwrite the data to a scaled version
     data_all = data_all_scaled
+    training_all = training_all_scaled
     
     #=======================================
     # Run the PCA
@@ -190,11 +199,12 @@ if __name__ == '__main__':
     # need to subtract the mean).
     pca = PCA()
     pca.fit(data_all)
-
+    
     # Find the loadings for each sample = how much of each component contributes to that sample.
     # [n_samples, n_features] dot TRANSPOSE([n_components, n_features]) = [n_samples, n_components]
     data_all_pca = pca.transform(data_all)
-
+    training_all_pca = pca.transform(training_all_pca)
+    
     # Plot the variance of each component to get a feel which components to keep
     fig, ax = plt.subplots()
     ax.plot(100*pca.explained_variance_ratio_,'b.-')
@@ -203,8 +213,97 @@ if __name__ == '__main__':
     ax.set_xlabel('PCA component ID')
     ax.set_ylabel('Percent of variance explained')
     plt.savefig(model_dir+"/sl_pca_variance.png")
+    
+    #=======================================
+    # Find the PCA distance for each point
+    #=======================================
+    # Merge the GL_id back into the PCA'ed data for indexing
+    # All training data (WHONDRS) - GL_id = NaN
+    # All collab data - GL_id < 100000
+    data_all_pca_w_id = pd.concat([id_df,pd.DataFrame(data_all_pca)],axis=1)
+    
+    # Using just the first two components:
+    # (Not significantly different from using all components)
+    pca_n2_dist = np.linalg.norm(data_all_pca[:,0:2],axis=1)
+    traininig_all['pca.dist'] = np.linalg.norm(training_all_pca[:,0:2],axis=1)
+    # Using all components (unweighted)
+    pca_all_dist = np.linalg.norm(data_all_pca,axis=1)
+    
+    # 1) Get the WHONDRS PCA data and get collab PCA data
+    # (square brackets at the end trim off the ID column while
+    # retaining the PCA component data).
+    data_WHONDRS_pca = data_all_pca_w_id[np.isnan(data_all_pca_w_id['GL_id'])].values[:,1:]
+    data_collab_pca = data_all_pca_w_id[data_all_pca_w_id['GL_id'] < 10000].values[:,1:]
+    
+    # 2) Get the WHONDRS centroid:
+    WHONDRS_centroid = data_WHONDRS_pca.mean(0)
+    
+    # 3) Get the distance wrt WHONDRS centroid using
+    #    only first two PCA components:
+    pca_n2_WHONDRS_dist = np.linalg.norm(
+            (data_all_pca[:,0:2] - WHONDRS_centroid[0:2]),axis=1)
+    
+    # 4) Plots
+    # Compare all components to 2 components
+    fig, (ax0, ax1, ax2) = plt.subplots(1,3,figsize=(15,5))
+    ax0.plot(pca_n2_dist,pca_all_dist,'k.')
+    ax0.set_xlabel('Site distance using 2 components')
+    ax0.set_ylabel('Site distance using all components')
+    ax0.plot([0,15],[0,15],'r-')
+    ax0.grid()
+    
+    # Compare all-data centroid to WHONDRS centroid
+    ax1.plot(pca_n2_dist,pca_n2_WHONDRS_dist,'k.')
+    ax1.set_xlabel('Site distance using 2 components and all sites` centroid')
+    ax1.set_ylabel('Site distance using 2 components and WHONDRS centroid')
+    ax1.plot([0,15],[0,15],'r-')
+    ax1.grid()
+    
+    # Plot PC1 v.s. PC2
+    ax2.plot(data_all_pca[:,0],data_all_pca[:,1],'r+')
+    ax2.plot(data_WHONDRS_pca[:,0],data_WHONDRS_pca[:,1],'k.')
+    ax2.plot(data_collab_pca[:,0],data_collab_pca[:,1],'c+',markerfacecolor="none", markersize="10", markeredgecolor="cyan")
+    ax2.plot(training_all_pca[:,0],training_all_pca[:,1],'ko')
+    
+    # Do NOT need to plot all data centroid - it is zero by definition
+    ax2.plot(WHONDRS_centroid[0],WHONDRS_centroid[1],'k+',markerfacecolor="none", markersize="30", markeredgecolor="black")
+    ax2.set_xlabel('PC1')
+    ax2.set_ylabel('PC2')
+    ax2.grid()
+    ax2.legend(['All data points','WHONDRS sites','Collab sites','WHONDRS centroid'])
+    plt.savefig(model_dir+"/sl_pca_scatter.png")
+    
+    #================================
+    # Final merge and write output
+    #================================
+    # Get just the IDs for the predict points (GLORICH + COLLAB)
+    id_predict_df = id_df[np.logical_not(np.isnan(id_df['GL_id']))]
+    
+    # Concatenate the PCA distance with the errors
+    predict_err['pca.dist'] = pd.DataFrame(
+        pca_n2_WHONDRS_dist[
+            np.logical_not(
+                np.isnan(data_all_pca_w_id['GL_id']))])
 
-    #=======================================
-    # 
-    #=======================================
+    # Normalize and combine PCA distance with error
+    predict_err['mean.error.scaled'] = predict_err['mean.error']/predict_err.max()['mean.error']
+    predict_err['pca.dist.scaled'] = predict_err['pca.dist']/predict_err.max()['pca.dist']
+    predict_err['combined.metric'] = predict_err['mean.error.scaled']*predict_err['pca.dist.scaled']
+
+    # Ensure all dataframe indeces are restarted
+    id_predict_df.reset_index(drop=True,inplace=True)
+    predict_err.reset_index(drop=True,inplace=True)
+    predict_rr.reset_index(drop=True,inplace=True)
+    predict_xy.reset_index(drop=True,inplace=True)
+
+    # Put all output into a single dataframe
+    output_df = pd.concat([
+        id_predict_df,
+        predict_xy,
+        predict_rr,
+        predict_err],axis=1)
+
+    # Write to output files
+    output_df.to_csv(pca_output,index=False)
+    training_all_pca.to_csv(pca_output.split(".")[0]+"_training.csv",index=False)
 print("Done!")
