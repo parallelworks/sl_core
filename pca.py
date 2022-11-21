@@ -226,7 +226,7 @@ if __name__ == '__main__':
     # Using just the first two components:
     # (Not significantly different from using all components)
     pca_n2_dist = np.linalg.norm(data_all_pca[:,0:2],axis=1)
-    training_all['pca.dist'] = np.linalg.norm(training_all_pca[:,0:2],axis=1)
+    
     # Using all components (unweighted)
     pca_all_dist = np.linalg.norm(data_all_pca,axis=1)
     
@@ -242,7 +242,9 @@ if __name__ == '__main__':
     # 3) Get the distance wrt WHONDRS centroid using
     #    only first two PCA components:
     pca_n2_WHONDRS_dist = np.linalg.norm(
-            (data_all_pca[:,0:2] - WHONDRS_centroid[0:2]),axis=1)
+        (data_all_pca[:,0:2] - WHONDRS_centroid[0:2]),axis=1)
+    training_n2_WHONDRS_dist = np.linalg.norm(
+        (training_all_pca[:,0:2] - WHONDRS_centroid[0:2]),axis=1)
     
     # 4) Plots
     # Compare all components to 2 components
@@ -285,7 +287,15 @@ if __name__ == '__main__':
         pca_n2_WHONDRS_dist[
             np.logical_not(
                 np.isnan(data_all_pca_w_id['GL_id']))])
-
+    
+    # Append the PCA dist to the training data
+    # (We don't need this every time - use it to
+    # decide on order to add WHONDRS sites for the
+    # experimental series of ModEx iterations.)
+    training_all = pd.read_csv(train_test_data)
+    training_all['pca.dist'] = pd.DataFrame(
+        training_n2_WHONDRS_dist)
+    
     # Normalize and combine PCA distance with error
     predict_err['mean.error.scaled'] = predict_err['mean.error']/predict_err.max()['mean.error']
     predict_err['pca.dist.scaled'] = predict_err['pca.dist']/predict_err.max()['pca.dist']
