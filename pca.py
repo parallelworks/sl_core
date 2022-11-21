@@ -226,7 +226,7 @@ if __name__ == '__main__':
     # Using just the first two components:
     # (Not significantly different from using all components)
     pca_n2_dist = np.linalg.norm(data_all_pca[:,0:2],axis=1)
-    traininig_all['pca.dist'] = np.linalg.norm(training_all_pca[:,0:2],axis=1)
+    training_all['pca.dist'] = np.linalg.norm(training_all_pca[:,0:2],axis=1)
     # Using all components (unweighted)
     pca_all_dist = np.linalg.norm(data_all_pca,axis=1)
     
@@ -306,5 +306,5 @@ if __name__ == '__main__':
 
     # Write to output files
     output_df.to_csv(pca_output,index=False)
-    training_all_pca.to_csv(pca_output.split(".")[0]+"_training.csv",index=False)
+    training_all.to_csv(pca_output.split(".")[0]+"_training.csv",index=False)
 print("Done!")
