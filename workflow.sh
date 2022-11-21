@@ -217,12 +217,12 @@ ssh -f ${ssh_options} $PW_USER@$remote_node sbatch" "\
 "${work_dir} "\
 "${miniconda_loc} "\
 "${my_env} "\
-"True "\
-"True "\
-"False "\
-"False "\
-"4 "\
-"loky "\
+"${WFP_hpo} "\
+"${WFP_cross_val_score} "\
+"${WFP_smogn} "\
+"${WFP_onnx} "\
+"${WFP_n_jobs} "\
+"${WFP_backend} "\
 "rate.mg.per.L.per.h "\
 "${abs_path_to_data_repo}/${WFP_predict_data}""\""
 
