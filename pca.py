@@ -170,6 +170,41 @@ if __name__ == '__main__':
     id_df = pd.DataFrame(data_all.pop('GL_id'),columns=pd.Index(['GL_id']))
     
     #========================================
-    # 
+    # Scale data before PCA
     #========================================
+    # cnsd = center, normalize by standard deviation
+    cnsd = StandardScaler()
+    cnsd.fit(data_all)
+    data_all_scaled = cnsd.transform(data_all)
+    
+    # Can you recover the data from the scaler?  Yes!
+    assert_array_almost_equal(data_all, cnsd.inverse_transform(data_all_scaled),decimal=6)
+    
+    # So overwrite the data to a scaled version
+    data_all = data_all_scaled
+    
+    #=======================================
+    # Run the PCA
+    #=======================================
+    # Data are automatically centered (no
+    # need to subtract the mean).
+    pca = PCA()
+    pca.fit(data_all)
+
+    # Find the loadings for each sample = how much of each component contributes to that sample.
+    # [n_samples, n_features] dot TRANSPOSE([n_components, n_features]) = [n_samples, n_components]
+    data_all_pca = pca.transform(data_all)
+
+    # Plot the variance of each component to get a feel which components to keep
+    fig, ax = plt.subplots()
+    ax.plot(100*pca.explained_variance_ratio_,'b.-')
+    ax.grid()
+    print(np.sum(pca.explained_variance_ratio_))
+    ax.set_xlabel('PCA component ID')
+    ax.set_ylabel('Percent of variance explained')
+    plt.savefig(model_dir+"/sl_pca_variance.png")
+
+    #=======================================
+    # 
+    #=======================================
 print("Done!")
