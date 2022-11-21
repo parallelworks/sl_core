@@ -174,7 +174,7 @@ if __name__ == '__main__':
     # values (as done for the training) and save the dataframe
     # so we can estimate the PCA-distance for each datapoint in
     # the training set, separately.
-    training_all.fillna(training_df.mean(), inplace = True)
+    training_all.fillna(training_all.mean(), inplace = True)
     
     #========================================
     # Scale data before PCA
