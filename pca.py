@@ -204,7 +204,7 @@ if __name__ == '__main__':
     # Find the loadings for each sample = how much of each component contributes to that sample.
     # [n_samples, n_features] dot TRANSPOSE([n_components, n_features]) = [n_samples, n_components]
     data_all_pca = pca.transform(data_all)
-    training_all_pca = pca.transform(training_all_pca)
+    training_all_pca = pca.transform(training_all)
     
     # Plot the variance of each component to get a feel which components to keep
     fig, ax = plt.subplots()
