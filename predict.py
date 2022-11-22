@@ -155,7 +155,8 @@ if __name__ == '__main__':
     
     print("RSE vs mean.error: "+str(np.corrcoef(rse,s_y)))
     print("RSE vs predict.error: "+str(np.corrcoef(rse,s_p)))
-    print("RSE vs s: "+str(np.corrcoef(rse,s*np.ones(np.shape(Y_test)))))
+    # Causes workflow to crash, not very useful, comment out.
+    #print("RSE vs s: "+str(np.corrcoef(rse,s*np.ones(np.shape(Y_test)))))
     
     #===========================================================
     # Make an evaluation plot
