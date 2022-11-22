@@ -12,7 +12,7 @@
       <param name='ml_arch_branch'
 	     label='ML archive BRANCH'
 	     type='text'
-	     value='ModEx-random-add'
+	     value='ModEx-ordered-add'
 	     width='50%_node%'>
       </param>
       <param name='ml_code_repo'

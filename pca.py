@@ -266,7 +266,7 @@ if __name__ == '__main__':
     ax2.plot(data_all_pca[:,0],data_all_pca[:,1],'r+')
     ax2.plot(data_WHONDRS_pca[:,0],data_WHONDRS_pca[:,1],'k.')
     ax2.plot(data_collab_pca[:,0],data_collab_pca[:,1],'c+',markerfacecolor="none", markersize="10", markeredgecolor="cyan")
-    ax2.plot(training_all_pca[:,0],training_all_pca[:,1],'ko')
+    #ax2.plot(training_all_pca[:,0],training_all_pca[:,1],'ko')
     
     # Do NOT need to plot all data centroid - it is zero by definition
     ax2.plot(WHONDRS_centroid[0],WHONDRS_centroid[1],'k+',markerfacecolor="none", markersize="30", markeredgecolor="black")
