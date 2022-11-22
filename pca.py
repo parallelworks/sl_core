@@ -292,6 +292,8 @@ if __name__ == '__main__':
     # (We don't need this every time - use it to
     # decide on order to add WHONDRS sites for the
     # experimental series of ModEx iterations.)
+    # (Actual file write out is commented out,
+    # below.)
     training_all = pd.read_csv(train_test_data)
     training_all['pca.dist'] = pd.DataFrame(
         training_n2_WHONDRS_dist)
@@ -316,5 +318,5 @@ if __name__ == '__main__':
 
     # Write to output files
     output_df.to_csv(pca_output,index=False)
-    training_all.to_csv(pca_output.split(".")[0]+"_training.csv",index=False)
+    #training_all.to_csv(pca_output.split(".")[0]+"_training.csv",index=False)
 print("Done!")
