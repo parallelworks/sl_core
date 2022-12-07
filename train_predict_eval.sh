@@ -1,3 +1,4 @@
+#!/bin/bash
 #=====================================
 # SuperLearner launch script
 #=====================================
@@ -13,6 +14,8 @@
 #               $NUM_INPUTS
 #               /path/to/sl_conf.py \
 #               /path/to/work_dir \
+#               /path/to/conda_install
+#               $CONDA_ENV_NAME
 #               $HPO_true_or_false \         #-----Bool opts---------
 #               $CV_true_or_false \
 #               $SMOGN_true_or_false \
@@ -20,7 +23,7 @@
 #               $NUM_JOBS \                  #-----HPC opts----------
 #               $BACKEND \
 #               $PREDICT_VAR \               #-----Predict opts------
-#               /path/to/predict_data.csv
+#               /path/to/predict_data
 #====================================
 
 echo Starting $0
@@ -41,31 +44,56 @@ sl_conf=$3
 # Define the work dir (where to run and put output)
 work_dir=$4
 
+# Define Conda environment location and name
+miniconda_loc=$5
+my_env=$6
+
 # Workflow boolean options (all either True or False)
-hpo=$5
-cv=$6
-smogn=$7
-onnx=$8
+hpo=$7
+cv=$8
+smogn=$9
+onnx=${10}
 
 # HPC options
-num_jobs=$9
-backend=$10
+num_jobs=${11}
+backend=${12}
 
 # Predict options
-predict_var=$11
-predict_data=$12
+predict_var=${13}
+predict_data=${14}
+
+echo Checking command line inputs:
+echo input_data $input_data
+echo num_inputs $num_inputs
+echo sl_conf $sl_conf
+echo work_dir $work_dir
+echo miniconda_loc $miniconda_loc
+echo my_env $my_env
+echo hpo $hpo
+echo cv $cv
+echo smogn $smogn
+echo onnx $onnx
+echo num_jobs $num_jobs
+echo backend $backend
+echo predict_var $predict_var
+echo predict_data $predict_data
 
 #===================================
 # Conda activate and log env
 #===================================
-# Location/name of Conda env is hard
-# coded and assumed to match
-# build_conda_env.sh
-my_env="sl_onnx"
-miniconda_loc="/home/$(whoami)/.miniconda3"
 source ${miniconda_loc}/etc/profile.d/conda.sh
 conda activate $my_env
-conda list -e > ${work_dir}/requirements.txt
+# Save Conda env setup and zip the file
+# because we don't want GH Dependabot to
+# interpret it as the repo's actual
+# requirements since this environment is
+# emphemeral (otherwise, GH may detect
+# security risks in packages and send lots
+# of warnings). The HPC code in this Conda
+# environment is being executed entirely
+# within the environment of the cluster and
+# is not exposed to the outside world.
+conda list -e | gzip -1c > ${work_dir}/requirements.txt.gz
 
 #===================================
 # Run the SuperLearner
@@ -79,28 +107,37 @@ python -m main \
        --model_dir ${work_dir} \
        --hpo $hpo \
        --data ${input_data} \
-       --backend $backend 1> ${work_dir}/std.out 2> ${work_dir}/std.err
+       --backend $backend 1> ${work_dir}/train.std.out 2> ${work_dir}/train.std.err
 
 #===================================
 # Print out information about the
 # model and make predictions
 #===================================
 
-# WORKING HERE
+python -m predict \
+       --model_dir ${work_dir} \
+       --predict_var ${predict_var} \
+       --num_inputs 25 \
+       --predict_data ${predict_data} 1> ${work_dir}/predict.std.out 2> ${work_dir}/predict.std.err
 
 #===================================
 # Run PCA on predictions
 #===================================
 
-# WORKING HERE
+python -m pca \
+       --model_dir ${work_dir} \
+       --num_inputs 25 \
+       --data ${input_data} \
+       --predict_var ${predict_var} \
+       --predict_data ${predict_data} 1> ${work_dir}/pca.std.out 2> ${work_dir}/pca.std.err
 
 #===================================
 # Compress outputs
 #===================================
 
 cd $work_dir
-# WORKING HERE
 ls
+#WORKING HERE
 
 #===================================
 echo $0 finished!

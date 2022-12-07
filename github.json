@@ -1,0 +1,8 @@
+{
+    "repo": "https://github.com/parallelworks/sl_core.git",
+    "branch": "main",
+    "dir": ".",
+    "xml": "workflow.xml",
+    "thumbnail": "superlearner.png",
+    "readme": "README.md"
+}

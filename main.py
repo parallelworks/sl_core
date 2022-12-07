@@ -106,7 +106,7 @@ if __name__ == '__main__':
     #===========================
     # Command line inputs
     #===========================
-    print("Parsing SuperLearner input arguments...")
+    print("Parsing SuperLearner train arguments...")
     parser = argparse.ArgumentParser()
     parsed, unknown = parser.parse_known_args()
     for arg in unknown:

@@ -117,6 +117,16 @@ abs_path_to_data_repo="/home/${PW_USER}/$(basename $ml_data_repo)"
 # Name of remote node
 remote_node=${WFP_whost}
 
+# Conda environment information
+miniconda_loc=$(echo $WFP_miniconda_loc | sed "s/__USER__/${PW_USER}/g")
+my_env=$WFP_my_env
+
+# Data paths
+work_dir_base=${WFP_work_dir_base}
+
+# Number of instances
+export WFP_num_inst=10
+
 echo Checking inputs to test:
 echo user: $PW_USER
 echo remote_node: $remote_node
@@ -132,6 +142,15 @@ echo Arch: $abs_path_to_arch_repo
 echo Data: $abs_path_to_data_repo
 echo Code: $abs_path_to_code_repo
 echo " "
+echo "Miniconda information:"
+echo Location: $miniconda_loc
+echo Env. name: $my_env
+echo " "
+echo "Data flow information:"
+echo Working dir basename: $work_dir_base
+echo " "
+echo "Number of instances"
+echo num_inst: $WFP_num_inst
 echo "===================================="
 echod Step 2: Cluster setup - staging files to head node
 echo " "
@@ -148,6 +167,15 @@ ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"da
 ssh ${PW_USER}@${remote_node} git clone ${ml_code_repo}
 ssh ${PW_USER}@${remote_node} git clone ${ml_data_repo}
 
+# Force other repos to pull, too.  The clone (above)
+# may fail if the repo already exists (i.e. a cluster
+# is being used again to run the workflow again). However,
+# in that case, it is essential that the repos pull in
+# any new updates (because the clone failed, so nothing
+# new was pulled).
+ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; git pull"
+ssh $PW_USER@$remote_node "cd ${abs_path_to_data_repo}; git pull"
+
 echo "======> Create ${ml_arch_branch}..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch ${ml_arch_branch}"
 echo "======> Checkout ${ml_arch_branch}..."
@@ -160,32 +188,92 @@ echo "======> Test for presence of Conda environment"
 ssh $PW_USER@$remote_node "ls /home/$PW_USER/.miniconda*"
 if [ $? -ne 0 ]; then
     echo "======> No Conda found; install Conda environment for SuperLearner."
-    ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; ./create_conda_env.sh"
+    # Redirect std output from this process
+    # to a separate log file.
+    echod This process can take several minutes.
+    echod See miniconda_install.log for progress.
+    ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; ./create_conda_env.sh ${miniconda_loc} ${my_env}" &> miniconda_install.log
 else
     echo "======> Conda found!  Assuming no need to install."
 fi
 
+# Ensure Conda install is done before proceeding
+# This is necessary because stdout and stderr
+# in the Conda intall process are redirected
+# elsewhere.
+wait
+
 echo "===================================="
 echod Step 3: Launch jobs on cluster
-echo CURRENTLY JUST WRITING A SIMPLE LOG FILE.
-echo INSERT SUPERLEARNER SRUN LAUNCHES HERE
-echo WITH A LOOP LAUNCH OF train_predict_eval.sh
 
-# (Note that this particular repo's .gitignore will ignore filenames
-# that match certain patterns, in particular ".log")
-ssh $PW_USER@$remote_node "echo Testing on $(date) >> ${abs_path_to_arch_repo}/ml_models/test.std.out"
+for (( ii=0; ii<$WFP_num_inst; ii++ ))
+do
+# Launch a single SuperLearner job
+work_dir=${abs_path_to_arch_repo}/${work_dir_base}${ii}
+echo "=======> Creating work dir: ${work_dir}"
+ssh $PW_USER@$remote_node "mkdir -p ${work_dir}"
+
+echo "======> Launching SuperLearner"
+# This launch line can be split over multiple
+# lines for readability BUT no spaces are allowed
+# outside of " " or the interpreter will assume it's
+# the end of the command.
+ssh -f ${ssh_options} $PW_USER@$remote_node sbatch" "\
+--output=sl.std.out.${remote_node}" "\
+--wrap" ""\"cd ${abs_path_to_code_repo}; ./train_predict_eval.sh "\
+"${abs_path_to_arch_repo}/${WFP_train_test_data} "\
+"${WFP_num_inputs} "\
+"${abs_path_to_code_repo}/${WFP_superlearner_conf} "\
+"${work_dir} "\
+"${miniconda_loc} "\
+"${my_env} "\
+"${WFP_hpo} "\
+"${WFP_cross_val_score} "\
+"${WFP_smogn} "\
+"${WFP_onnx} "\
+"${WFP_n_jobs} "\
+"${WFP_backend} "\
+"rate.mg.per.L.per.h "\
+"${abs_path_to_data_repo}/${WFP_predict_data}""\""
+done
 
 echo "===================================="
 echod Step 4: Monitor jobs on cluster
-echo INSERT SQUEUE LISTING CODE FROM SSH_BASH_DEMO
+
+# Check if there are any other running jobs on the cluster
+# by counting the number of lines in squeue output. One
+# line is the header line => no jobs are running.  Anything
+# more than 1 means that there is at least one job running.
+n_squeue="2"
+squeue_wait=10
+while [ $n_squeue -gt 1 ]
+do
+    # Wait first - sbatch launches may take
+    # a few seconds to register on squeue!
+    echod "Monitor waiting "${squeue_wait}" seconds..."
+    sleep $squeue_wait
+    n_squeue=$(ssh ${ssh_options} $PW_USER@$remote_node squeue | wc -l )
+    echod "Found "${n_squeue}" lines in squeue."
+done
+echod "No more pending jobs in squeue. Stage SLURM logs back."
+rsync $PW_USER@$remote_node:/home/$PW_USER/sl.std.out.${remote_node} ./
+
 
 echo "===================================="
 echod Step 5: Stage files back to GitHub
 echo "=====> Add and commit..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git add --all ."
-ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"Using deploy key on $(date)\""
+ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"${jobnum} on $(date)\""
 
 echo "=====> Push..."
 ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git push origin ${ml_arch_branch}\""
+
+echo "======> Stage files back to PW"
+# Although it is duplicating data, this
+# step will make it easier to loop over a
+# series of job directories for consolidating
+# results rather than having to loop through
+# git commits.
+rsync -av $PW_USER@$remote_node:${abs_path_to_arch_repo}/ml_models ./
 
 echo Done with $0

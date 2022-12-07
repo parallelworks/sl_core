@@ -1,7 +1,7 @@
 <tool id='sl_core' name='sl_core'>
   <command interpreter='bash'>workflow.sh</command>
   <inputs>
-    <section name='repos' type='section' title='Repositories, branches, and resources' expanded='true'>
+    <section name='repos' type='section' title='Repositories, branches, resources, and environments' expanded='true'>
       <param name='ml_arch_repo'
 	     label='ML archive repository'
 	     type='text'
@@ -12,7 +12,7 @@
       <param name='ml_arch_branch'
 	     label='ML archive BRANCH'
 	     type='text'
-	     value='ModEx-random-add'
+	     value='ModEx-ordered-add'
 	     width='50%_node%'>
       </param>
       <param name='ml_code_repo'
@@ -31,7 +31,22 @@
 	     label='Workflow host (cluster name)'
 	     type='text'
 	     value='cloud.clusters.pw'
-	     width='50%_none%'>
+	     width='50%_none%'
+	     help='Name of cluster to run on.'>
+      </param>
+      <param name='miniconda_loc'
+	     label='Location (prefix) of Miniconda installation'
+	     type='text'
+	     value='/home/__USER__/.miniconda3'
+	     width='50%_none%'
+	     help='Location of miniconda on cluster.  __USER__ is auto substituted.'>
+      </param>
+      <param name='my_env'
+	     label='Name of Miniconda environment'
+	     type='text'
+	     value='superlearner'
+	     width='50%_none%'
+	     help='Specify name of Miniconda environment to use. There is a bug with using base!'>
       </param>
     </section>
     <section name='superlearner' type='section' title='SuperLearner configuration' expanded='true'>
@@ -39,14 +54,14 @@
 	     label='Data for training and testing [.csv] [Inputs, Outputs]'
 	     type='text'
 	     help='The header contains the parameter names; the inputs must occupy the first columns; path wrt ML archive repo.'
-	     value='input_data/whondrs.csv'
+	     value='input_data/whondrs_25_inputs_train.csv'
 	     width='50%'>
       </param>
       <param name='predict_data'
              label='Data for predicting [.csv] [Inputs, Outputs]'
              type='text'
              help='The header contains the parameter names; only inputs; path wrt ML data repo.'
-             value='scripts/step_10_output.csv'
+             value='scripts/WH_RA_GL_global_predict_25_inputs'
              width='50%'>
       </param>
       <param name='num_inputs'
@@ -59,8 +74,15 @@
 	     label='SuperLearner configuration'
 	     type='text'
 	     help='SuperLearner configuration; path wrt ML code repo'
-	     value='sample_inputs/superlearner_conf_sklearn_NNLS.py'
+	     value='sample_inputs/superlearner_conf.py'
 	     width='50%_none%'>
+      </param>
+      <param name='work_dir_base'
+             label='Working directory basename wrt archive repo'
+             type='text'
+             value='ml_models/sl_'
+             width='50%_none%'
+	     help='Prefix/base of the location where to store all SL output in the archive repo. Test!'>
       </param>
       <param name='hpo'
 	     type='boolean'
@@ -120,12 +142,6 @@
 	     max='100'
 	     value='8'
 	     width='25%'>
-      </param>
-      <param name='model_dir'
-	     label='Model directory'
-	     type='text'
-	     value='./model_dir'
-	     width='50%'>
       </param>
     </section>
   </inputs>
