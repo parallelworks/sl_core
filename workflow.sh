@@ -160,8 +160,12 @@ echo "======> Clone repos to node..."
 # https://github.com/parallelworks/dynamic-learning-rivers/blob/main/test_deploy_key.sh
 
 # ML archive repo must be git cloned with ssh
-# b/c using ssh key for auth.
-ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"date; git clone ${ml_arch_repo}\""
+# b/c using ssh key for auth only if we want to push.
+if [ $WFP_push_to_gh = "True" ]; then
+    ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"date; git clone ${ml_arch_repo}\""
+else
+    ssh ${PW_USER}@${remote_node} git clone ${ml_arch_repo}
+fi
 
 # Other repos can be pulled via HTTPS or SSH.
 ssh ${PW_USER}@${remote_node} git clone ${ml_code_repo}
@@ -180,9 +184,12 @@ echo "======> Create ${ml_arch_branch}..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch ${ml_arch_branch}"
 echo "======> Checkout ${ml_arch_branch}..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git checkout ${ml_arch_branch}"
-echo "======> Set upstream branch in case branch exists already ${ml_arch_branch}..."
-ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch --set-upstream-to=origin/${ml_arch_branch} ${ml_arch_branch}"
-ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git pull\""
+
+if [ $WFP_push_to_gh = "True" ]; then
+    echo "======> Set upstream branch in case branch exists already ${ml_arch_branch}..."
+    ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch --set-upstream-to=origin/${ml_arch_branch} ${ml_arch_branch}"
+    ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git pull\""
+fi
 
 echo "======> Test for presence of Conda environment"
 ssh $PW_USER@$remote_node "ls /home/$PW_USER/.miniconda*"
@@ -265,8 +272,10 @@ echo "=====> Add and commit..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git add --all ."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"${jobnum} on $(date)\""
 
-echo "=====> Push..."
-ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git push origin ${ml_arch_branch}\""
+if [ $WFP_push_to_gh = "True" ]; then
+    echo "=====> Push..."
+    ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git push origin ${ml_arch_branch}\""
+fi
 
 echo "======> Stage files back to PW"
 # Although it is duplicating data, this

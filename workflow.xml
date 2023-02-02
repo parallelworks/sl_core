@@ -15,6 +15,16 @@
 	     value='ModEx-ordered-add'
 	     width='50%_node%'>
       </param>
+      <param name='push_to_gh'
+             type='boolean'
+             truevalue='Yes'
+             falsevalue='No'
+             checked='false'
+             label='Push results to GitHub'
+             help='Select yes to push results to GitHub. A deploy key for the repo is required.'
+             width='25%_none%'
+             float='right'>
+      </param>
       <param name='ml_code_repo'
 	     label='ML code repository'
 	     type='text'
