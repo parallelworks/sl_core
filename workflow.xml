@@ -5,7 +5,7 @@
       <param name='ml_arch_repo'
 	     label='ML archive repository'
 	     type='text'
-	     value='git@github.com:parallelworks/dynamic-learning-rivers'
+	     value='https://github.com/parallelworks/dynamic-learning-rivers'
 	     width='50%_none%'
 	     help='Repo MUST have SSH prefix, e.g. git@github.com:org/repo, for SSH auth w/ deploy keys to push'>
       </param>
