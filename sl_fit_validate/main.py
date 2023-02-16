@@ -188,7 +188,8 @@ if __name__ == '__main__':
         regular_smogn = regular_smogn.append(smogn.smoter(
             data = regular_smogn,
             y = y_col_name,
-            drop_na_row = True
+            drop_na_row = True,
+            seed=SEED
         ))
         regular_smogn = regular_smogn.drop_duplicates()
 
@@ -198,7 +199,8 @@ if __name__ == '__main__':
             drop_na_row = True,
             # rel_method = 'manual',    ## string ('auto' or 'manual')
             # rel_ctrl_pts_rg = rg_mtrx, ## 2d array (format: [x, y])
-            samp_method = "extreme"
+            samp_method = "extreme",
+            seed=SEED
         ))
         extreme_smogn = extreme_smogn.drop_duplicates()
 
