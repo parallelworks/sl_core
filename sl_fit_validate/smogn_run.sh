@@ -23,9 +23,9 @@ work_dir=$2
 #===================================
 # Conda activate and log env
 #===================================
-source $HOME/mambaforge/etc/profile.d/conda.sh
+source $HOME/mambaforge/etc/profile.d/mamba.sh
 conda activate sl_onnx
-conda list -e > ${work_dir}/requirements.txt
+mamba list -e > ${work_dir}/requirements.txt
 
 #===================================
 # Run the SuperLearner
