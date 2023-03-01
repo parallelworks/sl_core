@@ -44,7 +44,7 @@ fi
     $my_env \
     True \
     True \
-    False \
+    True \ # smogn
     False \
     4 \
     loky \

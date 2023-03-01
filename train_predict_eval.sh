@@ -27,6 +27,7 @@
 #====================================
 
 echo Starting $0
+# todo: change once smogn works
 echo Options for ONNX and SMOGN are currently ignored!
 
 #====================================
@@ -106,6 +107,7 @@ python -m main \
        --cross_val_score $cv \
        --model_dir ${work_dir} \
        --hpo $hpo \
+       --smogn $smogn \
        --data ${input_data} \
        --backend $backend 1> ${work_dir}/train.std.out 2> ${work_dir}/train.std.err
 

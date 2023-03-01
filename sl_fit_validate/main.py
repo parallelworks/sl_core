@@ -16,6 +16,7 @@
 # --cross_val_score 'True'
 # --model_dir './model_dir'
 # --hpo 'True'
+# --smogn 'True'
 # --data '/pw/workflows/sl_test/whondrml_global_train_25_inputs_update.csv'
 # --backend 'loky'
 #
@@ -164,53 +165,57 @@ if __name__ == '__main__':
     data = clean_data_df(data)
     # Shuffle the entire dataset
     data = data.sample(frac=1, random_state=SEED).reset_index(drop=True)
-    # remove 30% of the dataset for testing later
-    smogn_test = data.iloc[:math.ceil(len(data)*.3), :]
-    smogn_train = data.iloc[math.ceil(len(data)*.3):, :].reset_index()
+    if args.smogn == "True":
+        # remove 30% of the dataset for testing later
+        smogn_test = data.iloc[:math.ceil(len(data)*.3), :]
+        smogn_train = data.iloc[math.ceil(len(data)*.3):, :].reset_index()
 
-    smogn_test.to_csv(args.model_dir+"/smogn_test.csv", index=False, na_rep='NaN')
+        smogn_test.to_csv(args.model_dir+"/smogn_test.csv", index=False, na_rep='NaN')
 
-    # smogn
+        # smogn
 
-    # specify phi relevance values
-    # rg_mtrx = [
-    #     [0,  1, 0],  ## over-sample ("minority")
-    #     [-10, 0, 0],  ## under-sample ("majority")
-    #     [-20, 0, 0],  ## under-sample
-    #     [-30, 0, 0],  ## under-sample
-    # ]
+        # specify phi relevance values
+        # rg_mtrx = [
+        #     [0,  1, 0],  ## over-sample ("minority")
+        #     [-10, 0, 0],  ## under-sample ("majority")
+        #     [-20, 0, 0],  ## under-sample
+        #     [-30, 0, 0],  ## under-sample
+        # ]
 
-    regular_smogn = smogn_train
-    extreme_smogn = smogn_train
-    y_col_name = "rate.mg.per.L.per.h"
+        regular_smogn = smogn_train
+        extreme_smogn = smogn_train
+        y_col_name = "rate.mg.per.L.per.h"
 
-    for i in range(1):
-        regular_smogn = regular_smogn.append(smogn.smoter(
-            data = regular_smogn,
-            y = y_col_name,
-            drop_na_row = True,
-            seed=SEED
-        ))
-        regular_smogn = regular_smogn.drop_duplicates()
+        for i in range(1):
+            regular_smogn = regular_smogn.append(smogn.smoter(
+                data = regular_smogn,
+                y = y_col_name,
+                drop_na_row = True,
+                seed=SEED
+            ))
+            regular_smogn = regular_smogn.drop_duplicates()
 
-        extreme_smogn = extreme_smogn.append(smogn.smoter(
-            data = extreme_smogn,
-            y = y_col_name,
-            drop_na_row = True,
-            # rel_method = 'manual',    ## string ('auto' or 'manual')
-            # rel_ctrl_pts_rg = rg_mtrx, ## 2d array (format: [x, y])
-            samp_method = "extreme",
-            seed=SEED
-        ))
-        extreme_smogn = extreme_smogn.drop_duplicates()
+            extreme_smogn = extreme_smogn.append(smogn.smoter(
+                data = extreme_smogn,
+                y = y_col_name,
+                drop_na_row = True,
+                # rel_method = 'manual',    ## string ('auto' or 'manual')
+                # rel_ctrl_pts_rg = rg_mtrx, ## 2d array (format: [x, y])
+                samp_method = "extreme",
+                seed=SEED
+            ))
+            extreme_smogn = extreme_smogn.drop_duplicates()
 
-    final_smogn_train = regular_smogn.append(extreme_smogn)
-    final_smogn_train = final_smogn_train.drop_duplicates()
-    final_smogn_train = final_smogn_train.drop(columns=["index"])
-    final_smogn_train.to_csv(args.model_dir + "/final_smogn_train.csv", index=False, na_rep='NaN')
+        final_smogn_train = regular_smogn.append(extreme_smogn)
+        final_smogn_train = final_smogn_train.drop_duplicates()
+        final_smogn_train = final_smogn_train.drop(columns=["index"])
+        final_smogn_train.to_csv(args.model_dir + "/final_smogn_train.csv", index=False, na_rep='NaN')
 
-    # process data for the superlearner
-    X, Y, inames, onames = load_data_df_io(final_smogn_train, int(args.num_inputs))
+        # process data for the superlearner
+        X, Y, inames, onames = load_data_df_io(final_smogn_train, int(args.num_inputs))
+    else:
+        X, Y, inames, onames = load_data_csv_io(args.data, int(args.num_inputs))
+
     # NOTE: train and test datasets are the same size
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=SEED)
 
