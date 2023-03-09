@@ -27,8 +27,7 @@
 #====================================
 
 echo Starting $0
-# todo: change once smogn works
-echo Options for ONNX and SMOGN are currently ignored!
+echo The option for ONNX is ignored!
 
 #====================================
 # Command line requirements

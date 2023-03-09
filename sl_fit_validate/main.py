@@ -167,6 +167,7 @@ if __name__ == '__main__':
     data = data.sample(frac=1, random_state=SEED).reset_index(drop=True)
     if args.smogn == "True":
         # remove 30% of the dataset for testing later
+        # TODO: this removes a significant portion of the data since the dataset is minuscule, should remove later
         smogn_test = data.iloc[:math.ceil(len(data)*.3), :]
         smogn_train = data.iloc[math.ceil(len(data)*.3):, :].reset_index()
 
@@ -186,6 +187,8 @@ if __name__ == '__main__':
         extreme_smogn = smogn_train
         y_col_name = "rate.mg.per.L.per.h"
 
+        # number of smogn iterations 
+        # TODO: high iterations throws an error with either duplicate values or not enough datapoints 
         for i in range(1):
             regular_smogn = regular_smogn.append(smogn.smoter(
                 data = regular_smogn,
