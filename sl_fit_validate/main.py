@@ -223,9 +223,6 @@ if __name__ == '__main__':
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=SEED)
 
 
-    # X, Y, inames, onames = load_data_csv_io(args.data, int(args.num_inputs))
-    # X_train, X_test, Y_train, Y_test = train_test_split(X, Y)
-
     # Apply sampling to training set only
     # CAUTION: Template for testing only.
     # Currently works only if Y is an integer
