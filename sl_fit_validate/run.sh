@@ -23,7 +23,7 @@ work_dir=$2
 #===================================
 # Conda activate and log env
 #===================================
-source $HOME/mambaforge/etc/profile.d/conda.sh
+source $HOME/.miniconda3/etc/profile.d/conda.sh
 conda activate sl_onnx
 conda list -e > ${work_dir}/requirements.txt
 
@@ -31,7 +31,7 @@ conda list -e > ${work_dir}/requirements.txt
 # Run the SuperLearner
 #===================================
 python -m main \
-       --conda_sh '~/mambaforge/etc/profile.d/conda.sh' \
+       --conda_sh '~/.miniconda3/etc/profile.d/conda.sh' \
        --superlearner_conf '../sample_inputs/superlearner_conf_NNLS_TTR.py' \
        --n_jobs '8' \
        --num_inputs '25' \
