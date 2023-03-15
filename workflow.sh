@@ -125,7 +125,8 @@ my_env=$WFP_my_env
 work_dir_base=${WFP_work_dir_base}
 
 # Number of instances
-export WFP_num_inst=10
+# No longer hard coded, option in workflow.xml
+#export WFP_num_inst=10
 
 echo Checking inputs to test:
 echo user: $PW_USER

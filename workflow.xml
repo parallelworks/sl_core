@@ -146,12 +146,20 @@
 	<option value='dask'>dask</option>
       </param>
       <param name='n_jobs'
-	     label='Number parallel jobs'
+	     label='Number of parallel jobs on worker'
 	     type='integer'
 	     min='1'
 	     max='100'
 	     value='8'
 	     width='25%'>
+      </param>
+      <param name='num_inst'
+             label='Number of SuperLearner instances (duplicate stacked-regressors trained)'
+             type='integer'
+             min='1'
+             max='100'
+             value='10'
+             width='25%'>
       </param>
     </section>
   </inputs>
