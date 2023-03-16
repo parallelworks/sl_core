@@ -1,13 +1,24 @@
 # sl_core
 Core application code for SuperLearner, templates, and documentation.
 
+## TL;DR
+
+```bash
+# Run the SuperLearner locally with sample data
+git clone https://github.com/parallelworks/sl_core
+cd sl_core
+./local_superlearner_test.sh
+```
+
 ## Usage
 
 For testing the usage of the SuperLearner, please start with
 `train_predict_evaluate.sh` which is a wrapper that launches
 the central part of the SuperLearner code `main.py` as well as
 the two post-training operations of making predictions and
-estimating errors, `predict.py` and `errors.py`, respectively.
+estimating errors, `predict.py` and `errors.py`, respectively. 
+The launch script `local_superlearner_test.sh` is a template for
+how to specify the options of `train_predict_evaluate.sh`.
 
 Broadly, `train_predict_evaluate.sh` is meant to be launched as
 part of a larger workflow that includes syncing machine learning
