@@ -502,7 +502,7 @@ SuperLearnerConf = {
                 {
                     "regressor__etr__n_estimators": (100, 10000),
                     "regressor__etr__ccp_alpha": [0, 0.001, 0.01, 0.1],
-                    "regressor__etr__max_features": ["auto", "sqrt", "log2"],
+                    "regressor__etr__max_features": [1.0, "sqrt", "log2"],
                     "regressor__etr__criterion": ["squared_error", "absolute_error", "friedman_mse", "poisson"],
                     "regressor__etr__max_depth": [2, 3, 4, 5, 6, 7, 8],
                     "regressor__etr__min_samples_split": [0.1, 0.2, 0.3],
