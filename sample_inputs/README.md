@@ -76,3 +76,23 @@ their own transformations. Users could even experiment
 with different transformations by adding additional target
 column(s) to their data set as the SuperLearner will fit
 independent ensembles of models to each target column.
+
+## Predict data
+
+For the current needs of dynamic-learning-rivers,
+we want to keep track of site ID, longitude and 
+latitude, but NOT include them as features for
+training.  Therefore, the workflow splits the
+predict data into `.csv` and `.ixy` files, both
+in CSV format.  The first file has 25 features,
+the same as the training data.  The second file
+is a list of site IDs and sample lons and lats
+created from the `.csv` file with:
+```bash
+ awk '{OFS=","; print NR, NR/10, NR/10}' whondrs_25_inputs_predict.csv > whondrs_25_inputs_predict.ixy
+``` 
+
+Future work will streamline/generalize this process 
+of keeping track of ancilliary data but not training 
+with it.  This is especially useful for running
+analytics later and evaluating FPI.

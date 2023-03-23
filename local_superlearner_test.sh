@@ -49,6 +49,6 @@ fi
     4 \
     loky \
     rate.mg.per.L.per.h \
-    ./sample_inputs/whondrs_25_inputs_predict.csv
+    ./sample_inputs/whondrs_25_inputs_predict
 
 echo Finished $0
