@@ -38,13 +38,13 @@ fi
 ./train_predict_eval.sh \
     ./sample_inputs/whondrs_25_inputs_train.csv \
     25 \
-    ./sample_inputs/superlearner_conf_sklearn_NNLS.py \
+    ./sample_inputs/superlearner_conf.py \
     $work_dir \
     $miniconda_loc \
     $my_env \
     True \
     True \
-    True \ # smogn
+    True \
     False \
     4 \
     loky \
