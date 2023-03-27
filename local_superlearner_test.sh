@@ -16,7 +16,7 @@
 # One place to specify Conda install
 # location for the rest of the pipeline.
 miniconda_loc="${HOME}/.miniconda3"
-my_env="sl_onnx"
+my_env="superlearner"
 
 # Specify the output (working) directory
 # and make it if it does not yet exist.
