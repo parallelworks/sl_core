@@ -100,7 +100,7 @@ def save_data_csv_io(x_np, y_np, inames, onames, out_file_name):
     x_df = pd.DataFrame(x_np,columns=inames)
     y_df = pd.DataFrame(y_np,columns=onames)
     df_out = pd.concat([x_df,y_df],axis=1)
-    df_out.to_csv(out_file_name,index=False,na_rep='NaN')
+    df_out.to_csv(out_file_name,index=False,na_rep='NaN',mode='w')
 
 def format_estimators(estimators_dict):
     # Define StackingRegressor
