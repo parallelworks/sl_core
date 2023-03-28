@@ -48,6 +48,7 @@ import sys
 import argparse
 import os, shutil, pickle, json
 from copy import deepcopy
+import random
 
 #=======================================
 # Supporting functions
@@ -88,7 +89,8 @@ def load_data_csv_io(data_csv, num_inputs):
     return X, Y, pnames[:num_inputs], pnames[num_inputs:]
 
 def load_data_df_io(data_df, num_inputs):
-    """ TODO docstring """
+    # Split features and targets from a dataframe based on
+    # number of inputs.
     data_df = clean_data_df(data_df)
     pnames = list(data_df)
     X = data_df.values[:, :num_inputs]
@@ -160,20 +162,40 @@ if __name__ == '__main__':
     # Load Data
     #===========================
 
-    SEED = 1337
-    data = pd.read_csv(args.data).astype(np.float32)
-    data = clean_data_df(data)
+    # Set same seed (test upper bound, below)
+    SEED = 1000000
+
+    # Set random seed
+    #SEED = random.randint(1,1000000)
+
+    #data = pd.read_csv(args.data).astype(np.float32)
+    #data = clean_data_df(data)
     # Shuffle the entire dataset
-    data = data.sample(frac=1, random_state=SEED).reset_index(drop=True)
+    #data = data.sample(frac=1, random_state=SEED).reset_index(drop=True)
+
+    # Always load the original data for cross-validation
+    X, Y, inames, onames = load_data_csv_io(args.data, int(args.num_inputs))
+
+    # Train and test dataset construction depends on SMOGN or not
     if args.smogn == "True":
-        # remove 30% of the dataset for testing later
-        # TODO: this removes a significant portion of the data since the dataset is minuscule, should remove later
-        smogn_test = data.iloc[:math.ceil(len(data)*.3), :]
-        smogn_train = data.iloc[math.ceil(len(data)*.3):, :].reset_index()
+    
+        data = pd.read_csv(args.data).astype(np.float32)
+        data = clean_data_df(data)
+        # Shuffle the entire dataset
+        data = data.sample(frac=1, random_state=SEED).reset_index(drop=True)
 
-        smogn_test.to_csv(args.model_dir+"/smogn_test.csv", index=False, na_rep='NaN')
+        # Remove 25% of the dataset for testing later
+        # 25% is the default in sklearn.train_test_split
+        # This is essential since information from data points 
+        # input to SMOGN will transfer throughout the resulting
+        # training set. 
+        smogn_test = data.iloc[:math.ceil(len(data)*.25), :]
+        smogn_train = data.iloc[math.ceil(len(data)*.25):, :].reset_index()
 
-        # smogn
+        # Remove this so we only have one test data set.
+        #smogn_test.to_csv(args.model_dir+"/smogn_test.csv", index=False, na_rep='NaN')
+
+        # Apply SMOGN
 
         # specify phi relevance values
         # rg_mtrx = [
@@ -212,16 +234,15 @@ if __name__ == '__main__':
         final_smogn_train = regular_smogn.append(extreme_smogn)
         final_smogn_train = final_smogn_train.drop_duplicates()
         final_smogn_train = final_smogn_train.drop(columns=["index"])
-        final_smogn_train.to_csv(args.model_dir + "/final_smogn_train.csv", index=False, na_rep='NaN')
+        #final_smogn_train.to_csv(args.model_dir + "/final_smogn_train.csv", index=False, na_rep='NaN')
 
         # process data for the superlearner
-        X, Y, inames, onames = load_data_df_io(final_smogn_train, int(args.num_inputs))
+        X_test, Y_test, inames_test, onames_test = load_data_df_io(smogn_test,int(args.num_inputs))
+        X_train, Y_train, inames_train, onames_train = load_data_df_io(final_smogn_train, int(args.num_inputs))
     else:
-        X, Y, inames, onames = load_data_csv_io(args.data, int(args.num_inputs))
-
-    # NOTE: train and test datasets are the same size
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=SEED)
-
+        # Indent so it is clear that train_test_split is only used for non-SMOGNed data
+        # NOTE: train and test datasets are the same size
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=SEED)
 
     # Apply sampling to training set only
     # CAUTION: Template for testing only.
@@ -309,6 +330,7 @@ if __name__ == '__main__':
             n_jobs = n_jobs
         )
 
+    #=================================================================
     # Fit SuperLearners:
     for oi, oname in enumerate(onames):
         print('Training estimator for output: ' + oname, flush = True)
@@ -318,7 +340,8 @@ if __name__ == '__main__':
 
     with open(args.model_dir + '/SuperLearners.pkl', 'wb') as output:
         pickle.dump(SuperLearners, output, pickle.HIGHEST_PROTOCOL)
-
+    
+    #================================================================
     # Cross_val_score:
     if args.cross_val_score == "True":
         cross_val_metrics = {}
@@ -344,7 +367,7 @@ if __name__ == '__main__':
         print('Statistics of the cross-validation metrics:')
 
 
-
+    #===========================================================
     # Evaluate SuperLearners on test set:
     ho_metrics = {}
     for oi, oname in enumerate(onames):
@@ -369,8 +392,8 @@ if __name__ == '__main__':
     print(json.dumps(ho_metrics, indent = 4), flush = True)
     with open(args.model_dir + '/classical-metrics.json', 'w') as json_file:
         json.dump(ho_metrics, json_file, indent = 4)
-    #=========================================================
 
+    #=========================================================
     # For debugging
     if args.backend == 'dask':
         shutil.move(dask_log_dir, args.model_dir)
