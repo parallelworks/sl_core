@@ -248,8 +248,7 @@ if __name__ == '__main__':
     sys.path.append(os.path.dirname(args.superlearner_conf))
     sl_conf = getattr(
         # Second, import the file as a module.  Drop ".py".
-        # importlib.import_module(os.path.basename(args.superlearner_conf.replace('.py',''))),
-        importlib.import_module(os.path.basename(args.superlearner_conf)),
+        importlib.import_module(os.path.basename(args.superlearner_conf.replace('.py',''))),
         'SuperLearnerConf'
     )
 

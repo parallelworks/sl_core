@@ -120,6 +120,8 @@ conda install -y -c conda-forge onnxmltools
 conda install -y -c conda-forge onnxruntime
 
 # Pip packages last
-pip install smogn
+# SMOGN on pip does not allow for seed option.  Use dev.
+#pip install smogn
+pip install git+https://github.com/nickkunz/smogn.git
 
 echo Finished $0
