@@ -119,4 +119,7 @@ conda install -y -c conda-forge scikit-optimize${sklopt_version}
 conda install -y -c conda-forge onnxmltools
 conda install -y -c conda-forge onnxruntime
 
+# Pip packages last
+pip install smogn
+
 echo Finished $0
