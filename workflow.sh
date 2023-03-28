@@ -163,6 +163,11 @@ echo "======> Clone repos to node..."
 # ML archive repo must be git cloned with ssh
 # b/c using ssh key for auth only if we want to push.
 if [ $WFP_push_to_gh = "True" ]; then
+    # Must first exit any existing background/interactive SSH sessions
+    # If a user has logged into the cluster and is viewing the progress
+    # of the run, ssh -A will not work properly?
+    ssh ${PW_USER}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
+    ssh -O exit ${PW_USER}@${remote_node}
     ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"date; git clone ${ml_arch_repo}\""
 else
     ssh ${PW_USER}@${remote_node} git clone ${ml_arch_repo}
@@ -189,6 +194,8 @@ ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git checkout ${ml_arch_b
 if [ $WFP_push_to_gh = "True" ]; then
     echo "======> Set upstream branch in case branch exists already ${ml_arch_branch}..."
     ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch --set-upstream-to=origin/${ml_arch_branch} ${ml_arch_branch}"
+    ssh ${PW_USER}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
+    ssh -O exit ${PW_USER}@${remote_node}
     ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git pull\""
 fi
 
@@ -275,6 +282,8 @@ ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"${jobnum
 
 if [ $WFP_push_to_gh = "True" ]; then
     echo "=====> Push..."
+    ssh ${PW_USER}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
+    ssh -O exit ${PW_USER}@${remote_node}
     ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git push origin ${ml_arch_branch}\""
 fi
 
