@@ -98,7 +98,7 @@ conda list -e | gzip -1c > ${work_dir}/requirements.txt.gz
 #===================================
 # Run the SuperLearner
 #===================================
-python -m main \
+python -m train \
        --conda_sh "${miniconda_loc}/etc/profile.d/conda.sh" \
        --superlearner_conf $sl_conf \
        --n_jobs $num_jobs \
