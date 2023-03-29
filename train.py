@@ -163,10 +163,10 @@ if __name__ == '__main__':
     #===========================
 
     # Set same seed (test upper bound, below)
-    SEED = 1000000
+    #SEED = 1000000
 
     # Set random seed
-    #SEED = random.randint(1,1000000)
+    SEED = random.randint(1,1000000)
 
     #data = pd.read_csv(args.data).astype(np.float32)
     #data = clean_data_df(data)
@@ -175,6 +175,7 @@ if __name__ == '__main__':
 
     # Always load the original data for cross-validation
     X, Y, inames, onames = load_data_csv_io(args.data, int(args.num_inputs))
+    save_data_csv_io(X, Y, inames, onames, args.model_dir+'/original_input_data.csv')
 
     # Train and test dataset construction depends on SMOGN or not
     if args.smogn == "True":
