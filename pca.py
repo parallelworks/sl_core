@@ -111,8 +111,8 @@ if __name__ == '__main__':
             columns=pd.Index([predict_var]))
     
     # Remove lon, lat, and errors and store for later
-    predict_xy = pd.DataFrame(predict_all.pop('lon'),columns=pd.Index(['lon']))
-    predict_xy['lat'] = predict_all.pop('lat')
+    predict_xy = pd.DataFrame(predict_all.pop('Sample_Longitude'),columns=pd.Index(['Sample_Longitude']))
+    predict_xy['Sample_Latitude'] = predict_all.pop('Sample_Latitude')
     
     predict_err = pd.DataFrame(predict_all.pop('mean.error'),columns=pd.Index(['mean.error']))
     predict_err['predict.error'] = predict_all.pop('predict.error')
@@ -154,7 +154,7 @@ if __name__ == '__main__':
     # Remove any rows with any NaN in all columns execpt Gl_id
     search_nan_cols = []
     for col in data_all.columns:
-        if col != 'GL_id':
+        if col != 'Sample_ID':
             search_nan_cols.append(col)
             
     data_all.dropna(axis=0,how='any',inplace=True,subset=search_nan_cols)
@@ -163,20 +163,21 @@ if __name__ == '__main__':
     data_all.reset_index(drop=True,inplace=True)
     
     # Example for accessing the TRAINING DATA from the whole data set
-    # (All training data points have NaN ID's.)
-    #data_all[np.isnan(data_all['GL_id'])]
+    # (All training data points have NaN ID's because ID info is not
+    # read in for training - i.e. *train.ixy is not used.)
+    #data_all[np.isnan(data_all['Sample_ID'])]
     
     # Example for accessing the COLLAB DATA from the whole data set
-    # (All collab data have small IDs.)
-    #data_all[data_all['GL_id'] < 10000]
+    # (All collab data have IDs prefixed with "SP-")
+    #data_all[data_all['Sample_ID'].str.contains('SP-')]
     
     # Example for accessing the GLORICH DATA from the whole data set
-    # (Prediction data have large IDs.)
-    #data_all[data_all['GL_id'] > 10000]
+    # (GLORICH prediction data all have large integer IDs.)
+    #data_all[data_all['Sample_ID'].str.isnumeric()]
 
     # We do not want the ID to be part of the PCA,
     # so pull it out now and concatenate it later as needed.
-    id_df = pd.DataFrame(data_all.pop('GL_id'),columns=pd.Index(['GL_id']))
+    id_df = pd.DataFrame(data_all.pop('Sample_ID'),columns=pd.Index(['Sample_ID']))
 
     # Finally, the training data did not have an ID but it does
     # have quite a few NaN in it.  Overwrite those NaN with mean
@@ -241,9 +242,13 @@ if __name__ == '__main__':
     # 1) Get the WHONDRS PCA data and get collab PCA data
     # (square brackets at the end trim off the ID column while
     # retaining the PCA component data).
-    data_WHONDRS_pca = data_all_pca_w_id[np.isnan(data_all_pca_w_id['GL_id'])].values[:,1:]
-    data_collab_pca = data_all_pca_w_id[data_all_pca_w_id['GL_id'] < 10000].values[:,1:]
-    
+    data_WHONDRS_pca = data_all_pca_w_id[np.isnan(data_all_pca_w_id['Sample_ID'])].values[:,1:]
+
+    # Old ID system
+    #data_collab_pca = data_all_pca_w_id[data_all_pca_w_id['Sample_ID'] < 10000].values[:,1:]
+    # Current ID system
+    data_collab_pca = data_all_pca_w_id[data_all_pca_w_id['Sample_ID'].str.contains('SP-')].values[:,1:]
+
     # 2) Get the WHONDRS centroid:
     WHONDRS_centroid = data_WHONDRS_pca.mean(0)
     
@@ -288,13 +293,13 @@ if __name__ == '__main__':
     # Final merge and write output
     #================================
     # Get just the IDs for the predict points (GLORICH + COLLAB)
-    id_predict_df = id_df[np.logical_not(np.isnan(id_df['GL_id']))]
+    id_predict_df = id_df[np.logical_not(np.isnan(id_df['Sample_ID']))]
     
     # Concatenate the PCA distance with the errors
     predict_err['pca.dist'] = pd.DataFrame(
         pca_n2_WHONDRS_dist[
             np.logical_not(
-                np.isnan(data_all_pca_w_id['GL_id']))])
+                np.isnan(data_all_pca_w_id['Sample_ID']))])
     
     # Append the PCA dist to the training data
     # (We don't need this every time - use it to

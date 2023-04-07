@@ -1,4 +1,4 @@
-GL_id,lon,lat
+Sample_ID,Sample_Longitude,Sample_Latitude
 1,0.1,0.1
 2,0.2,0.2
 3,0.3,0.3
