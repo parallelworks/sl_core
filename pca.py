@@ -97,7 +97,10 @@ if __name__ == '__main__':
     #print(np.sum(np.isnan(predict_all)))
     
     # Lots of missing values in oxygen, so drop all these.
-    predict_all.drop(columns=['DO_mgL','DOSAT'],inplace=True)
+    predict_all.drop(
+        columns=predict_all.columns[
+            predict_all.columns.str.contains('DO')],
+            inplace=True)
     
     # 110 missing pH rows, drop whole rows.
     predict_all.dropna(axis=0,how='any',inplace=True)
@@ -129,7 +132,12 @@ if __name__ == '__main__':
     # exactly the same format as the merged predict_all but with fewer
     # rows.  Remove oxygen and respiration rates.
     training_all = pd.read_csv(train_test_data)
-    training_all.drop(columns=['DO_mgL','DOSAT',predict_var],inplace=True)
+    training_all.drop(
+        columns=training_all.columns[
+            np.logical_or(
+                training_all.columns.str.contains('DO'),
+                training_all.columns.str.contains(predict_var))],
+        inplace=True)
     
     print('Training data shape:')
     print(training_all.shape)
