@@ -64,14 +64,14 @@
 	     label='Data for training and testing [.csv] [Inputs, Outputs]'
 	     type='text'
 	     help='The header contains the parameter names; the inputs must occupy the first columns; path wrt ML archive repo.'
-	     value='input_data/whondrs_25_inputs_train.csv'
+	     value='scripts/prep_06_output_final_train.csv'
 	     width='50%'>
       </param>
       <param name='predict_data'
              label='Data for predicting [.csv] [Inputs, Outputs]'
              type='text'
-             help='The header contains the parameter names; only inputs; path wrt ML data repo.'
-             value='scripts/WH_RA_GL_global_predict_25_inputs'
+             help='The header contains the parameter names; only inputs; path wrt ML archive repo.'
+             value='scripts/prep_06_output_final_predict.csv'
              width='50%'>
       </param>
       <param name='num_inputs'
