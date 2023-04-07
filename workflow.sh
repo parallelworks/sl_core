@@ -248,7 +248,7 @@ ssh -f ${ssh_options} $PW_USER@$remote_node sbatch" "\
 "${WFP_onnx} "\
 "${WFP_n_jobs} "\
 "${WFP_backend} "\
-"rate.mg.per.L.per.h "\
+"Respiration_Rate_mg_per_L_per_H "\
 "${abs_path_to_data_repo}/${WFP_predict_data}""\""
 done
 

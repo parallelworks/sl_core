@@ -129,7 +129,7 @@ if __name__ == '__main__':
     # exactly the same format as the merged predict_all but with fewer
     # rows.  Remove oxygen and respiration rates.
     training_all = pd.read_csv(train_test_data)
-    training_all.drop(columns=['DO_mgL','DOSAT','rate.mg.per.L.per.h'],inplace=True)
+    training_all.drop(columns=['DO_mgL','DOSAT',predict_var],inplace=True)
     
     print('Training data shape:')
     print(training_all.shape)

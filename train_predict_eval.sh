@@ -103,6 +103,7 @@ python -m train \
        --superlearner_conf $sl_conf \
        --n_jobs $num_jobs \
        --num_inputs $num_inputs \
+       --predict_var ${predict_var} \
        --cross_val_score $cv \
        --model_dir ${work_dir} \
        --hpo $hpo \

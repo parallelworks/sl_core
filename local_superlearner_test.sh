@@ -48,7 +48,7 @@ fi
     False \
     4 \
     loky \
-    rate.mg.per.L.per.h \
+    Respiration_Rate_mg_per_L_per_H \
     ./sample_inputs/whondrs_25_inputs_predict
 
 echo Finished $0

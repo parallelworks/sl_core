@@ -172,10 +172,10 @@ if __name__ == '__main__':
     
     # Predict and metric with the individual models
     # (The same thing can be achieved with built in:
-    # superlearner['rate.mg.per.L.per.h'].transform(X)
+    # superlearner[predict_var].transform(X)
     # but done explicitly here.)
     for model_name in list_models:
-        model_object = superlearner['rate.mg.per.L.per.h'].named_estimators_[model_name]
+        model_object = superlearner[predict_var].named_estimators_[model_name]
         Y_hat_train_mod = model_object.predict(X_train)
         Y_hat_test_mod = model_object.predict(X_test)
         

@@ -152,6 +152,8 @@ if __name__ == '__main__':
         backend_params = {}
         n_jobs = None
 
+    predict_var=args.predict_var
+
     #===========================
     # Create Model Directory
     #===========================
@@ -208,7 +210,7 @@ if __name__ == '__main__':
 
         regular_smogn = smogn_train
         extreme_smogn = smogn_train
-        y_col_name = "rate.mg.per.L.per.h"
+        y_col_name = predict_var
 
         # number of smogn iterations 
         # TODO: high iterations throws an error with either duplicate values or not enough datapoints 

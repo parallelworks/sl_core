@@ -1,4 +1,4 @@
-RA_SO,RA_dm,run_mm_cyr,dor_pc_pva,gwt_cm_cav,ele_mt_cav,slp_dg_cav,sgr_dk_rav,tmp_dc_cyr,tmp_dc_cdi,pre_mm_cyr,pre_mm_cdi,for_pc_cse,crp_pc_cse,pst_pc_cse,ire_pc_cse,gla_pc_cse,prm_pc_cse,ppd_pk_cav,Temp_water,pH,DO_mgL,DOSAT,RA_ms_av,RA_ms_di,rate.mg.per.L.per.h
+RA_SO,RA_dm,run_mm_cyr,dor_pc_pva,gwt_cm_cav,ele_mt_cav,slp_dg_cav,sgr_dk_rav,tmp_dc_cyr,tmp_dc_cdi,pre_mm_cyr,pre_mm_cdi,for_pc_cse,crp_pc_cse,pst_pc_cse,ire_pc_cse,gla_pc_cse,prm_pc_cse,ppd_pk_cav,Temp_water,pH,DO_mgL,DOSAT,RA_ms_av,RA_ms_di,Respiration_Rate_mg_per_L_per_H
 2.0,0.705442,187.0,0.0,49.0,743.0,46.0,16.0,87.0,203.0,526.0,50.0,0.0,81.0,1.0,1.0,0.0,0.0,2168.388,8.66,6.5,10.25,87.93,0.4932690453230473,1.1869623915139826,-12.773
 2.0,0.705442,187.0,0.0,49.0,743.0,46.0,16.0,87.0,203.0,526.0,50.0,0.0,81.0,1.0,1.0,0.0,0.0,2168.388,8.66,6.5,10.25,87.93,0.4932690453230473,1.1869623915139826,-13.36
 2.0,0.705442,187.0,0.0,49.0,743.0,46.0,16.0,87.0,203.0,526.0,50.0,0.0,81.0,1.0,1.0,0.0,0.0,2168.388,8.66,6.5,10.25,87.93,0.4932690453230473,1.1869623915139826,-12.44
