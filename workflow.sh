@@ -219,6 +219,11 @@ fi
 wait
 
 echo "===================================="
+echod Step 2a: Preprocessing/Data Intake
+
+ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}/scripts; ./preprocess.sh ${miniconda_loc} ${my_env} ${abs_path_to_data_repo}" 
+
+echo "===================================="
 echod Step 3: Launch jobs on cluster
 
 for (( ii=0; ii<$WFP_num_inst; ii++ ))
@@ -249,7 +254,7 @@ ssh -f ${ssh_options} $PW_USER@$remote_node sbatch" "\
 "${WFP_n_jobs} "\
 "${WFP_backend} "\
 "Respiration_Rate_mg_per_L_per_H "\
-"${abs_path_to_data_repo}/${WFP_predict_data}""\""
+"${abs_path_to_arch_repo}/${WFP_predict_data}""\""
 done
 
 echo "===================================="
