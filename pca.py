@@ -164,8 +164,9 @@ if __name__ == '__main__':
     
     # Example for accessing the TRAINING DATA from the whole data set
     # (All training data points have NaN ID's because ID info is not
-    # read in for training - i.e. *train.ixy is not used.)
-    #data_all[np.isnan(data_all['Sample_ID'])]
+    # read in for training - i.e. *train.ixy is not used. Cannot use
+    # Numpy isnan to check - must use Pandas Series isnull().)
+    #data_all[data_all['Sample_ID'].isnull()]
     
     # Example for accessing the COLLAB DATA from the whole data set
     # (All collab data have IDs prefixed with "SP-")
@@ -242,7 +243,7 @@ if __name__ == '__main__':
     # 1) Get the WHONDRS PCA data and get collab PCA data
     # (square brackets at the end trim off the ID column while
     # retaining the PCA component data).
-    data_WHONDRS_pca = data_all_pca_w_id[np.isnan(data_all_pca_w_id['Sample_ID'])].values[:,1:]
+    data_WHONDRS_pca = data_all_pca_w_id[data_all_pca_w_id['Sample_ID'].isnull()].values[:,1:]
 
     # Old ID system
     #data_collab_pca = data_all_pca_w_id[data_all_pca_w_id['Sample_ID'] < 10000].values[:,1:]
@@ -293,13 +294,13 @@ if __name__ == '__main__':
     # Final merge and write output
     #================================
     # Get just the IDs for the predict points (GLORICH + COLLAB)
-    id_predict_df = id_df[np.logical_not(np.isnan(id_df['Sample_ID']))]
+    id_predict_df = id_df[np.logical_not(id_df['Sample_ID'].isnull())]
     
     # Concatenate the PCA distance with the errors
     predict_err['pca.dist'] = pd.DataFrame(
         pca_n2_WHONDRS_dist[
             np.logical_not(
-                np.isnan(data_all_pca_w_id['Sample_ID']))])
+                data_all_pca_w_id['Sample_ID'].isnull())])
     
     # Append the PCA dist to the training data
     # (We don't need this every time - use it to
