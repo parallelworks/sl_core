@@ -257,10 +257,13 @@ if __name__ == '__main__':
     
     # 3) Get the distance wrt WHONDRS centroid using
     #    only first two PCA components:
+    #    There are are data typing issues here that
+    #    require explicit usage of .astype(float), see:
+    #    https://stackoverflow.com/questions/59297543/why-do-i-get-the-loop-of-ufunc-does-not-support-argument-0-of-type-int-error-f
     pca_n2_WHONDRS_dist = np.linalg.norm(
-        (data_all_pca[:,0:2] - WHONDRS_centroid[0:2]),axis=1)
+        (data_all_pca[:,0:2].astype(float) - WHONDRS_centroid[0:2].astype(float)),axis=1)
     training_n2_WHONDRS_dist = np.linalg.norm(
-        (training_all_pca[:,0:2] - WHONDRS_centroid[0:2]),axis=1)
+        (training_all_pca[:,0:2].astype(float) - WHONDRS_centroid[0:2].astype(float)),axis=1)
     
     # 4) Plots
     # Compare all components to 2 components
