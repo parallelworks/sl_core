@@ -169,8 +169,10 @@ if __name__ == '__main__':
     #data_all[data_all['Sample_ID'].isnull()]
     
     # Example for accessing the COLLAB DATA from the whole data set
-    # (All collab data have IDs prefixed with "SP-")
-    #data_all[data_all['Sample_ID'].str.contains('SP-')]
+    # (All collab data have IDs prefixed with "SP-".  Need to prefilter
+    # any empty strings to automatically False, see:
+    # https://stackoverflow.com/questions/66536221/getting-cannot-mask-with-non-boolean-array-containing-na-nan-values-but-the)
+    #data_all[data_all['Sample_ID'].str.contains('SP-', na=False)]
     
     # Example for accessing the GLORICH DATA from the whole data set
     # (GLORICH prediction data all have large integer IDs.)
@@ -248,7 +250,7 @@ if __name__ == '__main__':
     # Old ID system
     #data_collab_pca = data_all_pca_w_id[data_all_pca_w_id['Sample_ID'] < 10000].values[:,1:]
     # Current ID system
-    data_collab_pca = data_all_pca_w_id[data_all_pca_w_id['Sample_ID'].str.contains('SP-')].values[:,1:]
+    data_collab_pca = data_all_pca_w_id[data_all_pca_w_id['Sample_ID'].str.contains('SP-', na=False)].values[:,1:]
 
     # 2) Get the WHONDRS centroid:
     WHONDRS_centroid = data_WHONDRS_pca.mean(0)
