@@ -278,9 +278,13 @@ done
 echod "No more pending jobs in squeue. Stage SLURM logs back."
 rsync $PW_USER@$remote_node:/home/$PW_USER/sl.std.out.${remote_node} ./
 
+echo "===================================="
+echod Step 5: Postprocessing/
+
+ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}/scripts; ./postprocess.sh ${miniconda_loc} ${my_env} ${abs_path_to_data_repo}"
 
 echo "===================================="
-echod Step 5: Stage files back to GitHub
+echod Step 6: Stage files back to GitHub
 echo "=====> Add and commit..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git add --all ."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"${jobnum} on $(date)\""
