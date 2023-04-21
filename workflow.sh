@@ -303,5 +303,6 @@ echo "======> Stage files back to PW"
 # results rather than having to loop through
 # git commits.
 rsync -av $PW_USER@$remote_node:${abs_path_to_arch_repo}/ml_models ./
+rsync -av $PW_USER@$remote_node:${abs_path_to_arch_repo}/output_data ./
 
 echo Done with $0
