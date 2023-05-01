@@ -283,6 +283,10 @@ echod Step 5: Postprocessing/
 
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}/scripts; ./postprocess.sh ${miniconda_loc} ${my_env} ${abs_path_to_data_repo}"
 
+echo "======> Stage PW logs to remote repo for committing"
+rsync -av ./std.out $PW_USER@$remote_node:${abs_path_to_arch_repo}/output_data/std.out
+rsync -av ./std.err $PW_USER@$remote_node:${abs_path_to_arch_repo}/output_data/std.err
+
 echo "===================================="
 echod Step 6: Stage files back to GitHub
 echo "=====> Add and commit..."
