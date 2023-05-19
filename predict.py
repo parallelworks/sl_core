@@ -188,8 +188,8 @@ if __name__ == '__main__':
     ax.plot(Y_all,Y_all,'k')
 
     # Set zoom
-    ax.set_xlim([-45,0])
-    ax.set_ylim([-45,0])
+    #ax.set_xlim([-45,0])
+    #ax.set_ylim([-45,0])
 
     # Legend
     ax.legend(['Stacked TRAIN','Stacked TEST','TEST corr','TRAIN corr']+list_models+['one-to-one'])
