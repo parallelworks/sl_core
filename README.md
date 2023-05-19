@@ -14,10 +14,12 @@ cd sl_core
 
 For testing the usage of the SuperLearner, please start with
 `train_predict_evaluate.sh` which is a wrapper that launches
-the central part of the SuperLearner code `main.py` as well as
-the two post-training operations of making predictions and
-estimating errors, `predict.py` and `errors.py`, respectively. 
-The launch script `local_superlearner_test.sh` is a template for
+the learning part of the SuperLearner code (`train.py`) as well as
+post-training operations of making predictions (`predict.py`),
+estimating errors via a regression and principal component 
+analysis (PCA, `pca.py`) and running feature permutation 
+importance (FPI, 'fpi.py`). The launch script 
+`local_superlearner_test.sh` is a template for
 how to specify the options of `train_predict_evaluate.sh`.
 
 Broadly, `train_predict_evaluate.sh` is meant to be launched as
@@ -94,7 +96,7 @@ these files are used by `run.sh` in `sl_fit_validate`.
 + `sl_fit_validate`: Contains the SL `run.sh` and `main.sh`.  The
 runscript is a very simple example runscript. **Consider moving
 these files into the top level of the repo for combatibility with
-`workflow.json`-style workflow deployments.
+`workflow.json`-style workflow deployments.**
 
 + `sl_test`: An old version of the SuperLearner that is kept
 here only for development reference/convenience.  It will likely

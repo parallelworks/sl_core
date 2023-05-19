@@ -42,7 +42,7 @@ if __name__ == '__main__':
     #===========================================================
     model_dir = args.model_dir
 
-    # SuperLearner main.py always saves these files in model_dir:
+    # SuperLearner train.py always saves these files in model_dir:
     train_data = model_dir+'/train.csv'
     test_data = model_dir+'/test.csv'
 
