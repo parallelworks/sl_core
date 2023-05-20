@@ -111,6 +111,43 @@ if __name__ == '__main__':
     tmp_df = pd.read_csv(predict_output_file).astype(np.float32)
     Y_predict = tmp_df[predict_var]
     
+    #==========================================================
+    # FPI functions
+    #==========================================================
+    
+    def permute_importance(
+        permutation_feature_blocks_str, model, X, y, 
+        scoring_func, n_repeats=20, ratio_score=True):
+
+        base_preds = model.predict(X.values)
+        base_score = scoring_func(y, base_preds)
+
+        blocks, block_names = parse_permutation_feature_blocks(
+            permutation_feature_blocks_str, X.columns)
+        block_scores = list()
+        for block, block_name in zip(blocks, block_names):
+            block_df = X.copy()
+            repeat_scores = list()
+            for i_repeat in range(n_repeats):
+                print('For block '+block[0]+' iteration '+str(i_repeat))
+                block_df[block] = shuffle(block_df[block]).values
+                repeat_preds = model.predict(block_df.values)
+                repeat_scores.append(scoring_func(y, repeat_preds))
+
+            # Get block score
+            importance_score_mean = np.mean(repeat_scores) / base_score if ratio_score else np.mean(repeat_scores) - base_score
+            importance_score_std = np.std(repeat_scores) / base_score if ratio_score else np.std(repeat_scores) - base_score
+            block_scores.append((block_name, importance_score_mean, importance_score_std))
+
+        # Return output sorted by the mean ratio of change (second column)
+        # For coalescing FPI output from many runs, we don't want this
+        # sorting - just return the scores unsorted and we'll take the mean
+        # over many models and then sort later.
+        #return sorted(block_scores, key=lambda r: r[1], reverse=True)
+        return block_scores
+     
+    
+    
     #===========================================================
     # Find which variables are correlated
     #===========================================================
