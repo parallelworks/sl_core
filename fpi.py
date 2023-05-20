@@ -146,10 +146,37 @@ if __name__ == '__main__':
         #return sorted(block_scores, key=lambda r: r[1], reverse=True)
         return block_scores
      
-    
+    def parse_permutation_feature_blocks(
+        permutation_feature_blocks_str, df_column_index):
+        
+        blocks = [
+            [bl_item.strip() for bl_item in bl.strip().split(',')]
+            for bl in permutation_feature_blocks_str.strip().split(';')
+        ]  if permutation_feature_blocks_str else list()
+
+        column_idx = {v: k for k, v in enumerate(df_column_index)}
+        blocks_ = list()
+        blocks_names = list()
+        explicit_blocks = set()
+        for bl in blocks:
+            parsed_block = list()
+            for bl_item in bl:
+                if ':' in bl_item:
+                    start_col, end_col = bl_item.split(':')
+                    parsed_block.extend(
+                        list(df_column_index[column_idx[start_col]:column_idx[end_col] + 1]))
+                else:
+                    parsed_block.append(bl_item)
+            blocks_.append(parsed_block)
+            blocks_names.append(','.join(bl))
+            explicit_blocks = explicit_blocks.union(set(parsed_block))
+
+        for singleton in set(df_column_index) - explicit_blocks:
+            blocks_.append([singleton])
+            blocks_names.append(singleton)
+        return blocks_, blocks_names
     
     #===========================================================
-    # Find which variables are correlated
     #===========================================================
     
     # Working here
