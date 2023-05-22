@@ -50,6 +50,9 @@ import os, shutil, pickle, json
 from copy import deepcopy
 import random
 
+# For data plots
+import matplotlib.pyplot as plt
+
 #=======================================
 # Supporting functions
 #=======================================
@@ -407,3 +410,15 @@ if __name__ == '__main__':
     print('Save train/test data')
     save_data_csv_io(X_train, Y_train, inames, onames, args.model_dir+'/train.csv')
     save_data_csv_io(X_test, Y_test, inames, onames, args.model_dir+'/test.csv')
+
+    #============================================================
+    # Make a plot showing the histograms of the training and testing
+    # data sets.
+    fig, ax = plt.subplots(figsize=(15,6))
+    n, bins, patches = ax.hist(Y_train, 20, density=False, facecolor='g', alpha=0.5, align='mid', histtype='stepfilled')
+    n, bins, patches = ax.hist(Y_test, 20, density=False, facecolor='k', alpha=0.5, align='mid', histtype='stepfilled')
+    ax.legend(['Training set','Testing set'])
+    ax.set_xlabel('Histogram of target')
+    ax.set_ylabel('Frequency')
+    plt.savefig(args.model_dir+'/sl_targets_hist.png')
+
