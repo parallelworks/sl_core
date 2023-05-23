@@ -118,6 +118,7 @@ conda install -y xgboost${xgboost_version}
 conda install -y -c conda-forge scikit-optimize${sklopt_version}
 conda install -y -c conda-forge onnxmltools
 conda install -y -c conda-forge onnxruntime
+conda install -y seaborn
 
 # Pip packages last
 # SMOGN on pip does not allow for seed option.  Use dev.

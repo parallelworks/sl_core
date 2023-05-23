@@ -18,7 +18,7 @@ the learning part of the SuperLearner code (`train.py`) as well as
 post-training operations of making predictions (`predict.py`),
 estimating errors via a regression and principal component 
 analysis (PCA, `pca.py`) and running feature permutation 
-importance (FPI, 'fpi.py`). The launch script 
+importance (FPI, `fpi.py`). The launch script 
 `local_superlearner_test.sh` is a template for
 how to specify the options of `train_predict_evaluate.sh`.
 
@@ -35,6 +35,9 @@ run as Docker containers on GitHub and can be set up to launch
 PW workflow through the API.  Please see the
 [ML-archive repository](https://github.com/parallelworks/dynamic-learning-rivers) 
 associated with this workflow for more information.
+
+Additional information about each of the stages of the machine
+learning (train, predict, pca, fpi) are available in `ML.md`.
 
 ## Install
 
