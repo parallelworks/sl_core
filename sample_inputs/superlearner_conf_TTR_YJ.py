@@ -69,12 +69,67 @@ class NonNegativeLeastSquares(BaseEstimator, RegressorMixin):
 # _neg values apply -1 assuming all input values
 # are negative, so the log operation can work on
 # positive values.
+
+mms_min = -2.0
+mms_max = 4.0
+
 def log1p_neg(input):
-    print("hello")
-    return np.log1p(-1.0*input)
+
+    print(mms_min)
+    print(mms_max)
+
+    # Apply log10 transform
+    output = np.log10(np.abs(input))
+
+    # Apply MinMaxScaler
+    output = (output - mms_min)/(mms_max - mms_min)
+
+    return output
+
+    #print('Function: '+str(np.sum(np.sum(output > max_val))))
+    #print('Inp Min: '+str(np.min(input))+' Max: '+str(np.max(input)))
+    #print('Out Min: '+str(np.min(output))+' Max: '+str(np.max(output)))
+    #print('Nans: '+str(np.sum(np.sum(np.isnan(output)))))
+    #max_val = np.log1p(np.finfo(np.float64).max/2)
+    #output = np.log1p(np.abs(input))
+    #print(np.sum(np.sum(output > max_val)))
+    #output[output < -1.0*max_val]=-1.0*max_val
+    #output[output < 0.0] = 0.0
+    #output[output > max_val] = max_val
+    #return output
 
 def expm1_neg(input):
-    return -1.0*np.expm1(input)
+    print(mms_min)
+    print(mms_max)
+
+    max_val = np.finfo(np.float32).max
+    min_val = np.finfo(np.float32).eps
+
+    # Undo MinMaxScaler
+    undo_mms = input*(mms_max-mms_min) + mms_min
+
+    # Undo the log10 transform
+    output = (10.0**undo_mms)
+
+    # Check output is reasonable
+    output[output > max_val] = max_val
+    output[output < min_val] = min_val
+
+    # Make all values negative.
+    output = -1.0*output
+    
+    return output
+
+    #print('Inverse: '+str(np.sum(np.sum(output > max_val))))
+    #print('Inp Min: '+str(np.min(input))+' Max: '+str(np.max(input)))
+    #print('Out Min: '+str(np.min(output))+' Max: '+str(np.max(output)))
+    #print('Nans: '+str(np.sum(np.sum(np.isnan(output)))))
+    #max_val = np.log1p(np.finfo(np.float64).max/2)
+    #input_copy = input
+    #input_copy[input_copy > max_val] = max_val
+    #input_copy[input_copy < -1.0*max_val] = -1.0*max_val
+    #output = -1.0*np.expm1(input_copy)
+    #return output
 
 n_iter = 10
 cv = 5
@@ -153,6 +208,64 @@ SuperLearnerConf = {
                 {
                     "regressor__svr__C": (10**-6, 10**2.5, 'log-uniform'),
                     "regressor__svr__nu": (10**-10, 0.99, 'uniform')
+                },
+                n_iter = n_iter,
+                cv = cv
+            )
+        },
+        "nusvr-poly": {
+            "model": TransformedTargetRegressor(
+                regressor = Pipeline(
+                    [
+                        ('scale', MinMaxScaler()),
+                        ('svr', NuSVR(kernel='poly'))
+                    ]
+                ),
+                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+            ),
+            "hpo": BayesSearchCV(
+                TransformedTargetRegressor(
+                    regressor = Pipeline(
+                        [
+                            ('scale', MinMaxScaler()),
+                            ('svr', NuSVR(kernel='poly'))
+                        ]
+                    ),
+                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                ),
+                {
+                    "regressor__svr__C": (10**-6, 10**2.5, 'log-uniform'),
+                    "regressor__svr__nu": (10**-10, 0.99, 'uniform'),
+                    "regressor__svr__degree": [1, 2, 3]
+                },
+                n_iter = n_iter,
+                cv = cv
+            )
+        },
+        "nusvr-sig": {
+            "model": TransformedTargetRegressor(
+                regressor = Pipeline(
+                    [
+                        ('scale', MinMaxScaler()),
+                        ('svr', NuSVR(kernel='sigmoid'))
+                    ]
+                ),
+                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+            ),
+            "hpo": BayesSearchCV(
+                TransformedTargetRegressor(
+                    regressor = Pipeline(
+                        [
+                            ('scale', MinMaxScaler()),
+                            ('svr', NuSVR(kernel='sigmoid'))
+                        ]
+                    ),
+                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                ),
+                {
+                    "regressor__svr__C": (10**-6, 10**2.5, 'log-uniform'),
+                    "regressor__svr__nu": (10**-10, 0.99, 'uniform'),
+                    "regressor__svr__coef0": [-0.99, 0.99, 'uniform']
                 },
                 n_iter = n_iter,
                 cv = cv

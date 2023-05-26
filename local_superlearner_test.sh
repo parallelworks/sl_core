@@ -38,12 +38,12 @@ fi
 ./train_predict_eval.sh \
     ./sample_inputs/whondrs_25_inputs_train.csv \
     25 \
-    ./sample_inputs/superlearner_conf.py \
+    ./sample_inputs/superlearner_conf_TTR_YJ.py \
     $work_dir \
     $miniconda_loc \
     $my_env \
     True \
-    True \
+    False \
     False \
     False \
     4 \
