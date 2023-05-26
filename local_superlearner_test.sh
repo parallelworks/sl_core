@@ -44,7 +44,7 @@ fi
     $my_env \
     True \
     True \
-    True \
+    False \
     False \
     4 \
     loky \
