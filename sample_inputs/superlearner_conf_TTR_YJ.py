@@ -75,14 +75,27 @@ mms_max = 4.0
 
 def log1p_neg(input):
 
-    print(mms_min)
-    print(mms_max)
-
+    #print(mms_min)
+    #print(mms_max)
+    
+    # MinMaxScaler should have all values between 0 and 1.
+    max_val = 1
+    min_val = 0
+    
     # Apply log10 transform
-    output = np.log10(np.abs(input))
+    output = np.log10(-1.0*input)
 
     # Apply MinMaxScaler
     output = (output - mms_min)/(mms_max - mms_min)
+
+    # Count bad values
+    #num_too_big=np.sum(np.sum(output > max_val))
+    #num_too_small=np.sum(np.sum(output < min_val))
+    #print('Transform: Num too big: '+str(num_too_big)+' Num too small: '+str(num_too_small))
+
+    # Filter values
+    output[output > max_val] = max_val
+    output[output < min_val] = min_val
 
     return output
 
@@ -99,11 +112,15 @@ def log1p_neg(input):
     #return output
 
 def expm1_neg(input):
-    print(mms_min)
-    print(mms_max)
+    #print(mms_min)
+    #print(mms_max)
 
-    max_val = np.finfo(np.float32).max
-    min_val = np.finfo(np.float32).eps
+    #max_val = np.finfo(np.float32).max
+    #min_val = np.finfo(np.float32).eps
+
+    # Prefilter before apply MinMaxScaler
+    input[input < 0.0] = 0
+    input[input > 1.0] = 1
 
     # Undo MinMaxScaler
     undo_mms = input*(mms_max-mms_min) + mms_min
@@ -112,8 +129,13 @@ def expm1_neg(input):
     output = (10.0**undo_mms)
 
     # Check output is reasonable
-    output[output > max_val] = max_val
-    output[output < min_val] = min_val
+    #num_too_big=np.sum(np.sum(output > max_val))
+    #num_too_small=np.sum(np.sum(output < min_val))
+    #print('Inverse: Num too big: '+str(num_too_big)+' Num too small: '+str(num_too_small))
+    #output[output > max_val] = max_val
+    #output[output < min_val] = min_val
+    #output[np.isnan(output)] = min_val
+    #output[np.isinf(output)] = max_val
 
     # Make all values negative.
     output = -1.0*output
