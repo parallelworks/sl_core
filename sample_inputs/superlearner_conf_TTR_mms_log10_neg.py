@@ -1,17 +1,13 @@
 # SuperLearner configuration for:
-# 13 stacked ensemble models
+# 15 stacked ensemble models
 # Each uses MinMaxScaler or StandardScaler on inputs
-# Each uses TransformedTargetRegressor with custom Yeo-Johson
-# function/inverse pair on targets.
+# Each uses TransformedTargetRegressor with custom log10
+# and MinMaxScaler function/inverse pair on targets.
 #
-# YJ works well to transfor non-Guassian distributed data
-# into a bell curve (i.e. log distributions) and it is less
-# prone to over-fitting than the QuantileTransformer for
-# small data sets. Scikit-learn implements the Yeo-Johnson
-# algorithm in the PowerTransformer, but there are occasinally
-# some NaN values that arise during execution that cause crashes.
-# Here, I implement YJ as a custom function/inverse pair to 
-# explicitly check for NaNs.
+# This configuration is an attempt to reproduce as
+# closely as possible the simple approach to taking
+# a log10 of the target and training then model on
+# the transformed data.
 
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.base import BaseEstimator,RegressorMixin
@@ -70,6 +66,9 @@ class NonNegativeLeastSquares(BaseEstimator, RegressorMixin):
 # are negative, so the log operation can work on
 # positive values.
 
+# Manually specify MinMaxScaler bookends.  Since
+# the log10 operation is applied before the MMS,
+# these represent the span of orders of magnitude.
 mms_min = -2.0
 mms_max = 4.0
 
@@ -186,7 +185,7 @@ SuperLearnerConf = {
                         ('svr', NuSVR(kernel='rbf'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -196,7 +195,7 @@ SuperLearnerConf = {
                             ('svr', NuSVR(kernel='rbf'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__svr__C": (10**-6, 10**2.5, 'log-uniform'),
@@ -215,7 +214,7 @@ SuperLearnerConf = {
                         ('svr', NuSVR(kernel='linear'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -225,7 +224,7 @@ SuperLearnerConf = {
                             ('svr', NuSVR(kernel='linear'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__svr__C": (10**-6, 10**2.5, 'log-uniform'),
@@ -243,7 +242,7 @@ SuperLearnerConf = {
                         ('svr', NuSVR(kernel='poly'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -253,7 +252,7 @@ SuperLearnerConf = {
                             ('svr', NuSVR(kernel='poly'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__svr__C": (10**-6, 10**2.5, 'log-uniform'),
@@ -272,7 +271,7 @@ SuperLearnerConf = {
                         ('svr', NuSVR(kernel='sigmoid'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -282,7 +281,7 @@ SuperLearnerConf = {
                             ('svr', NuSVR(kernel='sigmoid'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__svr__C": (10**-6, 10**2.5, 'log-uniform'),
@@ -301,7 +300,7 @@ SuperLearnerConf = {
                         ('knn', KNeighborsRegressor(weights='uniform'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -311,7 +310,7 @@ SuperLearnerConf = {
                             ('knn', KNeighborsRegressor(weights='uniform'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__knn__n_neighbors": (1, 10, 'uniform')
@@ -328,7 +327,7 @@ SuperLearnerConf = {
                         ('knn', KNeighborsRegressor(weights='distance'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -338,7 +337,7 @@ SuperLearnerConf = {
                             ('knn', KNeighborsRegressor(weights='distance'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__knn__n_neighbors": (1, 10, 'uniform')
@@ -355,7 +354,7 @@ SuperLearnerConf = {
                         ('plsr', PLSRegression())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -365,7 +364,7 @@ SuperLearnerConf = {
                             ('plsr', PLSRegression())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__plsr__n_components": (1, 10, 'uniform')
@@ -382,7 +381,7 @@ SuperLearnerConf = {
                         ('mlp', MLPRegressor())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -392,7 +391,7 @@ SuperLearnerConf = {
                             ('mlp', MLPRegressor())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__mlp__hidden_layer_sizes": (10, 250),
@@ -413,7 +412,7 @@ SuperLearnerConf = {
                         ('linear', Ridge())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -424,7 +423,7 @@ SuperLearnerConf = {
                             ('linear', Ridge())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__poly__degree": [1, 2, 3],
@@ -443,7 +442,7 @@ SuperLearnerConf = {
                         ('linear', Lasso())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -454,7 +453,7 @@ SuperLearnerConf = {
                             ('linear', Lasso())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__poly__degree": [1, 2, 3],
@@ -473,7 +472,7 @@ SuperLearnerConf = {
                         ('linear', LinearRegression())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -484,7 +483,7 @@ SuperLearnerConf = {
                             ('linear', LinearRegression())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__poly__degree": [1, 2, 3]
@@ -502,7 +501,7 @@ SuperLearnerConf = {
                         ('linear', ElasticNet())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -513,7 +512,7 @@ SuperLearnerConf = {
                             ('linear', ElasticNet())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__poly__degree": [1, 2, 3],
@@ -533,7 +532,7 @@ SuperLearnerConf = {
                         ('linear', HuberRegressor())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -544,7 +543,7 @@ SuperLearnerConf = {
                             ('linear', HuberRegressor())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__poly__degree": [1, 2, 3],
@@ -563,7 +562,7 @@ SuperLearnerConf = {
                         ('xgb', XGBRegressor(objective = 'reg:squarederror'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -573,7 +572,7 @@ SuperLearnerConf = {
                             ('xgb', XGBRegressor(objective = 'reg:squarederror'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__xgb__n_estimators": (100, 10000),
@@ -592,7 +591,7 @@ SuperLearnerConf = {
                         ('etr', ExtraTreesRegressor())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -602,7 +601,7 @@ SuperLearnerConf = {
                             ('etr', ExtraTreesRegressor())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    func=mms_log10_neg, inverse_func=neg_exp10_mms, check_inverse=True
                 ),
                 {
                     "regressor__etr__n_estimators": (100, 10000),
