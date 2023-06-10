@@ -134,6 +134,16 @@ python -m pca \
        --predict_data ${predict_data} 1> ${work_dir}/pca.std.out 2> ${work_dir}/pca.std.err
 
 #===================================
+# Run FPI
+#===================================
+
+python -m fpi \
+       --model_dir ${work_dir} \
+       --predict_var ${predict_var} \
+       --num_inputs 25 \
+       --predict_data ${predict_data} 1> ${work_dir}/predict.std.out 2> ${work_dir}/predict.std.err
+
+#===================================
 # Compress outputs
 #===================================
 
