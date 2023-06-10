@@ -42,10 +42,16 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MaxAbsScaler
 import seaborn as sns
 
+import sys
+
 #=======================================
 # Main execution
 #=======================================
 if __name__ == '__main__':
+
+    # Constants
+    # TODO: we don't use jobid in local_superlearner_test.sh
+    jobid = 0
 
     #===========================
     # Command line inputs
@@ -76,6 +82,22 @@ if __name__ == '__main__':
     print("Submodels within SuperLearner and their weights:")
     list_models = list(superlearner[predict_var].named_estimators_.keys())
     print(list_models)
+
+    # Finally, the list of weights of the models can be accessed with:
+    # (Note the _ are important and have to do with scikit learn
+    # naming conventions of variables that are set after fitting.)
+    sl_weights = superlearner[predict_var].final_estimator_.weights_
+
+    # Use the weights to get a list of the models 
+    # that have been included in the SuperLearner
+    sl_models = []
+    mm = 0
+    for model in list_models:
+        #print(model)
+        sl_weights[mm]
+        if ( sl_weights[mm] > 0.1 ):
+            sl_models.append(model)
+        mm = mm + 1
     
     # The following only works for the scipy.optimize.nnls
     # stacking regressor, not the sklearn stacking regressors.
@@ -106,10 +128,17 @@ if __name__ == '__main__':
     X_test = test_df.values[:, :num_inputs]
     Y_test = test_df.values[:, num_inputs:]
 
+    all_df = pd.concat((train_df,test_df),axis=0)
+
+    # Pull the target column out, and remove it from data_df.
+    target_train_df = train_df.pop(predict_var)
+    target_test_df = test_df.pop(predict_var)
+    target_all_df = all_df.pop(predict_var)
+
     # Lines below may need to be generalized for multi-var
     # predictions.
     X_predict = pd.read_csv(predict_data_csv).astype(np.float32)
-    tmp_df = pd.read_csv(predict_output_file).astype(np.float32)
+    tmp_df = pd.read_csv(predict_output_file, dtype={'Sample_ID': str})
     Y_predict = tmp_df[predict_var]
     
     #==========================================================
@@ -117,9 +146,7 @@ if __name__ == '__main__':
     #==========================================================
 
     #----------------------------------------------------------
-    def permute_importance(
-        permutation_feature_blocks_str, model, X, y, 
-        scoring_func, n_repeats=20, ratio_score=True):
+    def permute_importance(permutation_feature_blocks_str, model, X, y, scoring_func, n_repeats=20, ratio_score=True):
 
         base_preds = model.predict(X.values)
         base_score = scoring_func(y, base_preds)
@@ -474,24 +501,132 @@ if __name__ == '__main__':
     short_names = [name[:12] for name in corr.columns]
     sns.heatmap(ax=ax, data=np.abs(corr), xticklabels=short_names, yticklabels=short_names, cmap=sns.diverging_palette(220, 10, as_cmap=True,n=3))
     plt.savefig(model_dir+'/sl_correlations.png')
+
+    group_correlated_features(
+        corr,
+        corr_cutoff=0.5,
+        merge_groups=True,
+        onehot_list=['General_Vegetation','River_Gradient','Sediment','Deposition','Hydrogeomorphology'],
+        verbose=False
+    )
+
+    # Step 2: What is the distribution of correlations?
+    # Is there a particular correlation cutoff that is relevant for this data set?
+    # In processing corr for plotting, first grab the lower triangle of the correlation
+    # heat map since the heat map is symmetric.  Then, reshape it to a vector, and then take
+    # the absolute value since we treat negative and positive correlations as the same.
+    fig, ax = plt.subplots(figsize=(15,6))
+    n, bins, patches = ax.hist(np.reshape(np.tril(np.abs(corr)),-1), 20, density=False, facecolor='g', alpha=0.75, align='mid', histtype='stepfilled')
+
+    # Step 3: Which features should be grouped together?
+    # Data that are inherently linked (i.e. one-hot and categorical features)?
+    # Expert knowledge?
+    # Cluster remaining data based on correlation?
+    corr_cutoff = 0.5
+    hot_spots = corr[np.abs(corr) >= corr_cutoff]
+    fig, ax = plt.subplots(figsize=(15,15))
+    sns.heatmap(ax=ax, data=np.abs(hot_spots), xticklabels=short_names, yticklabels=short_names, cmap=sns.diverging_palette(220, 10, as_cmap=True,n=3))
     
     #===========================================================
     # Run FPI
     #===========================================================
-    
-    # Working here
+
+    # general settings
+    job_list = [jobid]
+    permute_str = group_correlated_features(
+        corr,
+        corr_cutoff=0.5,
+        merge_groups=True,
+        onehot_list=['General_Vegetation','River_Gradient','Sediment','Deposition','Hydrogeomorphology'],
+        verbose=False)
+
+    #==========================================================
+    # Run FPI for stacked model and each individual submodel
+    #==========================================================
+    model_fpi_results = list()
+    sl_fpi_results = list()
+
+    i = 0
+    for job_id in job_list:
+        
+        print('Loading model for job: '+str(job_id))
+        sl = pickle.load(open(model_dir+"/"+"SuperLearners.pkl", "rb"))
+
+        #----------------------------------------------------
+        # FPI for stacked model
+        #----------------------------------------------------
+        model_object = sl[predict_var]
+        
+        print('FPI on stacked ensemble...')
+        result = permute_importance(permute_str, 
+                model_object,
+                all_df, 
+                target_all_df,
+                mean_squared_error)
+        # Convert back to dataframe, consider using MultiIndex
+        # functionality instead of the clunky filter below.
+        result_df = pd.DataFrame(result,
+                                columns=['Feature',
+                                        'Avg_Ratio'+'stack'+str(job_id), 
+                                        'Std_Ratio'+'stack'+str(job_id)]).set_index('Feature')
+        
+        sl_fpi_results.append(result_df)
+        
+        #----------------------------------------------------
+        # FPI for each submodel individually
+        #----------------------------------------------------
+        for model_name in sl_models:
+            model_object = sl[predict_var].named_estimators_[model_name]
+            
+            print('FPI on ML model: '+model_name+'...')
+            result = permute_importance(permute_str, 
+                model_object,
+                all_df, 
+                target_all_df,
+                mean_squared_error)
+            result_df = pd.DataFrame(result,
+                columns=['Feature',
+                'Avg_Ratio'+model_name+str(job_id), 
+                'Std_Ratio'+model_name+str(job_id)]).set_index('Feature')
+            
+            model_fpi_results.append(result_df)
+
+    # Merge all dataframes into a single frame with
+    # features as the index.
+    sl_fpi_results_df = pd.concat(sl_fpi_results,axis=1)
+    model_fpi_results_df = pd.concat(model_fpi_results,axis=1)
+
+    # Stacked model results
+    print(sl_fpi_results_df.sort_values(by='Avg_Ratiostack'+str(jobid),axis=0,ascending=False))
+
+    # All other model results
+    for model in sl_models:
+        print('--------'+model+'---------')
+        print(model_fpi_results_df['Avg_Ratio'+model+str(jobid)].sort_values(axis=0,ascending=False))
     
     #===========================================================
     # Make heatmap of variable correlations
     #===========================================================
     
     # Working here
+
+    # To view a particular model's list,
+    # Choose from ['nusvr', 'mlp', 'ridge', 'xgb']
+    # Choose from ['Avg_Ratio', 'Std_Ratio']
+    print(pd.DataFrame(
+        model_fpi_results_df.filter(
+            like='nusvr',axis=1).filter(
+            like='Avg_Ratio',axis=1).mean(axis=1)).sort_values(
+                by=0,
+                axis=0,
+                ascending=False))
     
     #===========================================================
     # Save outfile file
     #===========================================================
     
-    # Working here
+    sl_fpi_results_df.to_csv(f"{model_dir}/sl_fpi_results_df")
+    model_fpi_results_df.to_csv(f"{model_dir}/model_fpi_results_df")
     
     #===========================================================
     # Done!
