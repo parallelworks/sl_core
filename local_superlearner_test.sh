@@ -48,7 +48,7 @@ fi
     False \
     4 \
     loky \
-    Respiration_Rate_mg_per_L_per_H \
+    Normalized_Respiration_Rate_mg_DO_per_H_per_L_sediment \
     ./sample_inputs/whondrs_25_inputs_predict
 
 echo Finished $0
