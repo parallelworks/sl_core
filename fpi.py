@@ -500,7 +500,7 @@ if __name__ == '__main__':
     corr = all_df.corr()
     short_names = [name[:12] for name in corr.columns]
     sns.heatmap(ax=ax, data=np.abs(corr), xticklabels=short_names, yticklabels=short_names, cmap=sns.diverging_palette(220, 10, as_cmap=True,n=3))
-    plt.savefig(model_dir+'/sl_correlations.png')
+    plt.savefig(model_dir+'/sl_all_correlation_heatmap.png')
 
     group_correlated_features(
         corr,
@@ -517,6 +517,7 @@ if __name__ == '__main__':
     # the absolute value since we treat negative and positive correlations as the same.
     fig, ax = plt.subplots(figsize=(15,6))
     n, bins, patches = ax.hist(np.reshape(np.tril(np.abs(corr)),-1), 20, density=False, facecolor='g', alpha=0.75, align='mid', histtype='stepfilled')
+    plt.savefig(model_dir+'/sl_fpi_correlation_hist.png')
 
     # Step 3: Which features should be grouped together?
     # Data that are inherently linked (i.e. one-hot and categorical features)?
@@ -526,7 +527,8 @@ if __name__ == '__main__':
     hot_spots = corr[np.abs(corr) >= corr_cutoff]
     fig, ax = plt.subplots(figsize=(15,15))
     sns.heatmap(ax=ax, data=np.abs(hot_spots), xticklabels=short_names, yticklabels=short_names, cmap=sns.diverging_palette(220, 10, as_cmap=True,n=3))
-    
+    plt.savefig(model_dir+'/sl_fpi_correlation_heatmap.png')    
+
     #===========================================================
     # Run FPI
     #===========================================================

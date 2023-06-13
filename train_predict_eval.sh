@@ -141,7 +141,7 @@ python -m fpi \
        --model_dir ${work_dir} \
        --predict_var ${predict_var} \
        --num_inputs 25 \
-       --predict_data ${predict_data} 1> ${work_dir}/predict.std.out 2> ${work_dir}/predict.std.err
+       --predict_data ${predict_data} 1> ${work_dir}/fpi.std.out 2> ${work_dir}/fpi.std.err
 
 #===================================
 # Compress outputs
