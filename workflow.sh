@@ -238,6 +238,7 @@ echo "======> Launching SuperLearner"
 # lines for readability BUT no spaces are allowed
 # outside of " " or the interpreter will assume it's
 # the end of the command.
+echo "WARNING: Target variable name is hard coded here!"
 ssh -f ${ssh_options} $PW_USER@$remote_node sbatch" "\
 --output=sl.std.out.${remote_node}" "\
 --wrap" ""\"cd ${abs_path_to_code_repo}; ./train_predict_eval.sh "\
@@ -253,7 +254,7 @@ ssh -f ${ssh_options} $PW_USER@$remote_node sbatch" "\
 "${WFP_onnx} "\
 "${WFP_n_jobs} "\
 "${WFP_backend} "\
-"Respiration_Rate_mg_per_L_per_H "\
+"Normalized_Respiration_Rate_mg_DO_per_H_per_L_sediment "\
 "${abs_path_to_arch_repo}/${WFP_predict_data}""\""
 done
 

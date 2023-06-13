@@ -99,8 +99,8 @@ if __name__ == '__main__':
     # Lots of missing values in oxygen, so drop all these.
     predict_all.drop(
         columns=predict_all.columns[
-            predict_all.columns.str.contains('DO')],
-            inplace=True)
+            predict_all.columns.str.contains('Mean_DO')],
+        inplace=True)
     
     # 110 missing pH rows, drop whole rows.
     predict_all.dropna(axis=0,how='any',inplace=True)
