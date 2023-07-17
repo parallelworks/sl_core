@@ -125,9 +125,9 @@ ml_data_repo=$repos_ml_data_repo
 
 # The full path of the location to which the repo will be
 # on the remote node.
-abs_path_to_arch_repo="/home/${PW_USER}/$(basename $repos_arch_repo)"
-abs_path_to_code_repo="/home/${PW_USER}/$(basename $repos_code_repo)"
-abs_path_to_data_repo="/home/${PW_USER}/$(basename $repos_data_repo)"
+abs_path_to_arch_repo="/home/${PW_USER}/$(basename $ml_arch_repo)"
+abs_path_to_code_repo="/home/${PW_USER}/$(basename $ml_code_repo)"
+abs_path_to_data_repo="/home/${PW_USER}/$(basename $ml_data_repo)"
 
 # Name of remote node
 remote_node=${repos_whost}
