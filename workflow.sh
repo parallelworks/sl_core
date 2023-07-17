@@ -12,6 +12,11 @@
 # workflow.xml here defines
 # the form and the inputs
 # to the workflow.
+#
+# The inputs to the workflow in
+# workflow.xml are automatically
+# sent to inputs.sh when the 
+# workflow is launched.
 #======================
 
 #===============================
@@ -37,6 +42,8 @@ echo Step 1: Local setup on PW platform
 echo Execution is in $0 at `date`
 echo " "
 echo Workflow parameters from workflow.xml, apirun/main.py, or ./github/workflows/main.yaml:
+echo These parameters are command line arguments when invoking this script and
+echo are likely to be blank due to the usage of inputs.sh replacing command line arguments.
 echo $@
 echo " "
 
@@ -80,17 +87,25 @@ echod() {
     }
 
 # Convert command line inputs to environment variables.
-f_read_cmd_args $@
+# (This is unlikely to be used with newer workflow framework
+# that uses inputs.sh.)
+#f_read_cmd_args $@
 
+# The following worked with f_read_cmd_args, but is currently
+# not supported.
 # List of input arguments converted to environment vars:
-echo List of inputs converted to environment variables:
-env | grep WFP_
-echo " "
+#echo List of inputs converted to environment variables:
+#env | grep WFP_
+#echo " "
+
+# Put workflow inputs from inputs.sh into environment variables.
+# Variable naming is <form_section_name>_<param_name>.
+source inputs.sh
 
 # Testing echod
 echo "========================================================="
 echod Testing echod. Currently on `hostname`.
-echod Will excute as $PW_USER@$WFP_whost
+echod Will excute as $PW_USER@$repos_whost
 echod Running on the following computer: `hostname`
 echo " "
 
@@ -98,35 +113,31 @@ echo " "
 private_key="/home/${PW_USER}/.ssh/id_ed25519_dynamic-learning-rivers"
 
 # The repository we want to pull, modify, and push back
-ml_arch_repo=$WFP_ml_arch_repo
+ml_arch_repo=$repos_ml_arch_repo
 
 # The branch of the ml_archive repository we want to use
-ml_arch_branch=$WFP_ml_arch_branch
+ml_arch_branch=$repos_ml_arch_branch
 
 # Other repositories we want to include
 # TODO: autodetect ML-code repo since running as GH workflow?
-ml_code_repo=$WFP_ml_code_repo
-ml_data_repo=$WFP_ml_data_repo
+ml_code_repo=$repos_ml_code_repo
+ml_data_repo=$repos_ml_data_repo
 
 # The full path of the location to which the repo will be
 # on the remote node.
-abs_path_to_arch_repo="/home/${PW_USER}/$(basename $ml_arch_repo)"
-abs_path_to_code_repo="/home/${PW_USER}/$(basename $ml_code_repo)"
-abs_path_to_data_repo="/home/${PW_USER}/$(basename $ml_data_repo)"
+abs_path_to_arch_repo="/home/${PW_USER}/$(basename $repos_arch_repo)"
+abs_path_to_code_repo="/home/${PW_USER}/$(basename $repos_code_repo)"
+abs_path_to_data_repo="/home/${PW_USER}/$(basename $repos_data_repo)"
 
 # Name of remote node
-remote_node=${WFP_whost}
+remote_node=${repos_whost}
 
 # Conda environment information
-miniconda_loc=$(echo $WFP_miniconda_loc | sed "s/__USER__/${PW_USER}/g")
-my_env=$WFP_my_env
+miniconda_loc=$(echo $repos_miniconda_loc | sed "s/__USER__/${PW_USER}/g")
+my_env=$repos_my_env
 
 # Data paths
-work_dir_base=${WFP_work_dir_base}
-
-# Number of instances
-# No longer hard coded, option in workflow.xml
-#export WFP_num_inst=10
+work_dir_base=${superlearner_work_dir_base}
 
 echo Checking inputs to test:
 echo user: $PW_USER
@@ -151,7 +162,7 @@ echo "Data flow information:"
 echo Working dir basename: $work_dir_base
 echo " "
 echo "Number of instances"
-echo num_inst: $WFP_num_inst
+echo num_inst: $superlearner_num_inst
 echo "===================================="
 echod Step 2: Cluster setup - staging files to head node
 echo " "
@@ -162,7 +173,7 @@ echo "======> Clone repos to node..."
 
 # ML archive repo must be git cloned with ssh
 # b/c using ssh key for auth only if we want to push.
-if [ $WFP_push_to_gh = "True" ]; then
+if [ $repos_push_to_gh = "True" ]; then
     # Must first exit any existing background/interactive SSH sessions
     # If a user has logged into the cluster and is viewing the progress
     # of the run, ssh -A will not work properly?
@@ -191,7 +202,7 @@ ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch ${ml_arch_bra
 echo "======> Checkout ${ml_arch_branch}..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git checkout ${ml_arch_branch}"
 
-if [ $WFP_push_to_gh = "True" ]; then
+if [ $repos_push_to_gh = "True" ]; then
     echo "======> Set upstream branch in case branch exists already ${ml_arch_branch}..."
     ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch --set-upstream-to=origin/${ml_arch_branch} ${ml_arch_branch}"
     ssh ${PW_USER}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
@@ -226,7 +237,7 @@ ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}/scripts; ./preprocess.sh 
 echo "===================================="
 echod Step 3: Launch jobs on cluster
 
-for (( ii=0; ii<$WFP_num_inst; ii++ ))
+for (( ii=0; ii<$superlearner_num_inst; ii++ ))
 do
 # Launch a single SuperLearner job
 work_dir=${abs_path_to_arch_repo}/${work_dir_base}${ii}
@@ -242,20 +253,20 @@ echo "WARNING: Target variable name is hard coded here!"
 ssh -f ${ssh_options} $PW_USER@$remote_node sbatch" "\
 --output=sl.std.out.${remote_node}" "\
 --wrap" ""\"cd ${abs_path_to_code_repo}; ./train_predict_eval.sh "\
-"${abs_path_to_arch_repo}/${WFP_train_test_data} "\
-"${WFP_num_inputs} "\
-"${abs_path_to_code_repo}/${WFP_superlearner_conf} "\
+"${abs_path_to_arch_repo}/${superlearner_train_test_data} "\
+"${superlearner_num_inputs} "\
+"${abs_path_to_code_repo}/${superlearner_superlearner_conf} "\
 "${work_dir} "\
 "${miniconda_loc} "\
 "${my_env} "\
-"${WFP_hpo} "\
-"${WFP_cross_val_score} "\
-"${WFP_smogn} "\
-"${WFP_onnx} "\
-"${WFP_n_jobs} "\
-"${WFP_backend} "\
+"${superlearner_hpo} "\
+"${superlearner_cross_val_score} "\
+"${superlearner_smogn} "\
+"${superlearner_onnx} "\
+"${superlearner_n_jobs} "\
+"${superlearner_backend} "\
 "Normalized_Respiration_Rate_mg_DO_per_H_per_L_sediment "\
-"${abs_path_to_arch_repo}/${WFP_predict_data}""\""
+"${abs_path_to_arch_repo}/${superlearner_predict_data}""\""
 done
 
 echo "===================================="
@@ -294,7 +305,7 @@ echo "=====> Add and commit..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git add --all ."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"${jobnum} on $(date)\""
 
-if [ $WFP_push_to_gh = "True" ]; then
+if [ $repos_push_to_gh = "True" ]; then
     echo "=====> Push..."
     ssh ${PW_USER}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
     ssh -O exit ${PW_USER}@${remote_node}
