@@ -183,7 +183,7 @@ if __name__ == '__main__':
     save_data_csv_io(X, Y, inames, onames, args.model_dir+'/original_input_data.csv')
 
     # Train and test dataset construction depends on SMOGN or not
-    if args.smogn == "True":
+    if args.smogn == "true":
     
         data = pd.read_csv(args.data).astype(np.float32)
         data = clean_data_df(data)
@@ -289,7 +289,7 @@ if __name__ == '__main__':
     #================================
     # Run hyperparameter optimization
     #================================
-    if args.hpo == "True":
+    if args.hpo == "true":
         sl_conf_hpo = deepcopy(sl_conf)
         sl_conf_hpo['estimators'] = {}
         for oi, oname in enumerate(onames):
@@ -349,7 +349,7 @@ if __name__ == '__main__':
     
     #================================================================
     # Cross_val_score:
-    if args.cross_val_score == "True":
+    if args.cross_val_score == "true":
         cross_val_metrics = {}
         for oi, oname in enumerate(onames):
             cross_val_metrics[oname] = dict.fromkeys(['all', 'mean', 'std'])
