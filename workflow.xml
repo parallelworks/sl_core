@@ -39,10 +39,10 @@
       </param>
       <param name='whost'
 	     label='Workflow host (cluster name)'
-	     type='text'
+	     type='computeResource'
 	     value='cloud.clusters.pw'
 	     width='50%_none%'
-	     help='Name of cluster to run on.'>
+	     help='Name of cluster to run on. Select a resource from drop down menu.'>
       </param>
       <param name='miniconda_loc'
 	     label='Location (prefix) of Miniconda installation'

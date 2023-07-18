@@ -16,7 +16,10 @@
 # The inputs to the workflow in
 # workflow.xml are automatically
 # sent to inputs.sh when the 
-# workflow is launched.
+# workflow is launched. Information
+# about the resource (IP, username,
+# and display name) are automatically
+# loaded into inputs.sh.
 #======================
 
 #===============================
@@ -105,9 +108,12 @@ source inputs.sh
 # Testing echod
 echo "========================================================="
 echod Testing echod. Currently on `hostname`.
-echod Will excute as $PW_USER@$repos_whost
-echod Running on the following computer: `hostname`
+echod Will excute on remote resource as $repos_whost_username@$repos_whost_publicIp
 echo " "
+
+# Name of remote node and user account
+remote_node=${repos_whost_publicIp}
+remote_user=${repos_whost_username}
 
 # Private key created with ssh-keygen -t ed25519
 private_key="/home/${PW_USER}/.ssh/id_ed25519_dynamic-learning-rivers"
@@ -125,23 +131,22 @@ ml_data_repo=$repos_ml_data_repo
 
 # The full path of the location to which the repo will be
 # on the remote node.
-abs_path_to_arch_repo="/home/${PW_USER}/$(basename $ml_arch_repo)"
-abs_path_to_code_repo="/home/${PW_USER}/$(basename $ml_code_repo)"
-abs_path_to_data_repo="/home/${PW_USER}/$(basename $ml_data_repo)"
-
-# Name of remote node
-remote_node=${repos_whost}
+abs_path_to_arch_repo="/home/${remote_user}/$(basename $ml_arch_repo)"
+abs_path_to_code_repo="/home/${remote_user}/$(basename $ml_code_repo)"
+abs_path_to_data_repo="/home/${remote_user}/$(basename $ml_data_repo)"
 
 # Conda environment information
-miniconda_loc=$(echo $repos_miniconda_loc | sed "s/__USER__/${PW_USER}/g")
+miniconda_loc=$(echo $repos_miniconda_loc | sed "s/__USER__/${remote_user}/g")
 my_env=$repos_my_env
 
 # Data paths
 work_dir_base=${superlearner_work_dir_base}
 
 echo Checking inputs to test:
-echo user: $PW_USER
+echo local user: $PW_USER
+echo remote user: $remote_user
 echo remote_node: $remote_node
+echo cluster name: $repos_whost_name
 echo private_key: $private_key
 echo Checking for private_key: $(ls $private_key)
 echo ML archive repo: $ml_arch_repo
@@ -182,16 +187,16 @@ if [ $repos_push_to_gh = "true" ]; then
     # Must first exit any existing background/interactive SSH sessions
     # If a user has logged into the cluster and is viewing the progress
     # of the run, ssh -A will not work properly?
-    ssh ${PW_USER}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
-    ssh -O exit ${PW_USER}@${remote_node}
-    ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"date; git clone ${ml_arch_repo}\""
+    ssh ${remote_user}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
+    ssh -O exit ${remote_user}@${remote_node}
+    ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${remote_user}@${remote_node} \"date; git clone ${ml_arch_repo}\""
 else
-    ssh ${PW_USER}@${remote_node} git clone ${ml_arch_repo}
+    ssh ${remote_user}@${remote_node} git clone ${ml_arch_repo}
 fi
 
 # Other repos can be pulled via HTTPS or SSH.
-ssh ${PW_USER}@${remote_node} git clone ${ml_code_repo}
-ssh ${PW_USER}@${remote_node} git clone ${ml_data_repo}
+ssh ${remote_user}@${remote_node} git clone ${ml_code_repo}
+ssh ${remote_user}@${remote_node} git clone ${ml_data_repo}
 
 # Force other repos to pull, too.  The clone (above)
 # may fail if the repo already exists (i.e. a cluster
@@ -199,31 +204,31 @@ ssh ${PW_USER}@${remote_node} git clone ${ml_data_repo}
 # in that case, it is essential that the repos pull in
 # any new updates (because the clone failed, so nothing
 # new was pulled).
-ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; git pull"
-ssh $PW_USER@$remote_node "cd ${abs_path_to_data_repo}; git pull"
+ssh $remote_user@$remote_node "cd ${abs_path_to_code_repo}; git pull"
+ssh $remote_user@$remote_node "cd ${abs_path_to_data_repo}; git pull"
 
 echo "======> Create ${ml_arch_branch}..."
-ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch ${ml_arch_branch}"
+ssh $remote_user@$remote_node "cd ${abs_path_to_arch_repo}; git branch ${ml_arch_branch}"
 echo "======> Checkout ${ml_arch_branch}..."
-ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git checkout ${ml_arch_branch}"
+ssh $remote_user@$remote_node "cd ${abs_path_to_arch_repo}; git checkout ${ml_arch_branch}"
 
 if [ $repos_push_to_gh = "true" ]; then
     echo "======> Set upstream branch in case branch exists already ${ml_arch_branch}..."
-    ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch --set-upstream-to=origin/${ml_arch_branch} ${ml_arch_branch}"
-    ssh ${PW_USER}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
-    ssh -O exit ${PW_USER}@${remote_node}
-    ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git pull\""
+    ssh $remote_user@$remote_node "cd ${abs_path_to_arch_repo}; git branch --set-upstream-to=origin/${ml_arch_branch} ${ml_arch_branch}"
+    ssh ${remote_user}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
+    ssh -O exit ${remote_user}@${remote_node}
+    ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${remote_user}@${remote_node} \"cd ${abs_path_to_arch_repo}; git pull\""
 fi
 
 echo "======> Test for presence of Conda environment"
-ssh $PW_USER@$remote_node "ls /home/$PW_USER/.miniconda*"
+ssh $remote_user@$remote_node "ls /home/$remote_user/.miniconda*"
 if [ $? -ne 0 ]; then
     echo "======> No Conda found; install Conda environment for SuperLearner."
     # Redirect std output from this process
     # to a separate log file.
     echod This process can take several minutes.
     echod See miniconda_install.log for progress.
-    ssh $PW_USER@$remote_node "cd ${abs_path_to_code_repo}; ./create_conda_env.sh ${miniconda_loc} ${my_env}" &> miniconda_install.log
+    ssh $remote_user@$remote_node "cd ${abs_path_to_code_repo}; ./create_conda_env.sh ${miniconda_loc} ${my_env}" &> miniconda_install.log
 else
     echo "======> Conda found!  Assuming no need to install."
 fi
@@ -237,7 +242,7 @@ wait
 echo "===================================="
 echod Step 2a: Preprocessing/Data Intake
 
-ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}/scripts; ./preprocess.sh ${miniconda_loc} ${my_env} ${abs_path_to_data_repo}" 
+ssh $remote_user@$remote_node "cd ${abs_path_to_arch_repo}/scripts; ./preprocess.sh ${miniconda_loc} ${my_env} ${abs_path_to_data_repo}" 
 
 echo "===================================="
 echod Step 3: Launch jobs on cluster
@@ -247,7 +252,7 @@ do
 # Launch a single SuperLearner job
 work_dir=${abs_path_to_arch_repo}/${work_dir_base}${ii}
 echo "=======> Creating work dir: ${work_dir}"
-ssh $PW_USER@$remote_node "mkdir -p ${work_dir}"
+ssh $remote_user@$remote_node "mkdir -p ${work_dir}"
 
 echo "======> Launching SuperLearner"
 # This launch line can be split over multiple
@@ -255,7 +260,7 @@ echo "======> Launching SuperLearner"
 # outside of " " or the interpreter will assume it's
 # the end of the command.
 echo "WARNING: Target variable name is hard coded here!"
-ssh -f ${ssh_options} $PW_USER@$remote_node sbatch" "\
+ssh -f ${ssh_options} $remote_user@$remote_node sbatch" "\
 --output=sl.std.out.${remote_node}" "\
 --wrap" ""\"cd ${abs_path_to_code_repo}; ./train_predict_eval.sh "\
 "${abs_path_to_arch_repo}/${superlearner_train_test_data} "\
@@ -289,32 +294,32 @@ do
     # a few seconds to register on squeue!
     echod "Monitor waiting "${squeue_wait}" seconds..."
     sleep $squeue_wait
-    n_squeue=$(ssh ${ssh_options} $PW_USER@$remote_node squeue | wc -l )
+    n_squeue=$(ssh ${ssh_options} $remote_user@$remote_node squeue | wc -l )
     echod "Found "${n_squeue}" lines in squeue."
 done
 echod "No more pending jobs in squeue. Stage SLURM logs back."
-rsync $PW_USER@$remote_node:/home/$PW_USER/sl.std.out.${remote_node} ./
+rsync $remote_user@$remote_node:/home/$remote_user/sl.std.out.${remote_node} ./
 
 echo "===================================="
 echod Step 5: Postprocessing/
 
-ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}/scripts; ./postprocess.sh ${miniconda_loc} ${my_env} ${abs_path_to_data_repo}"
+ssh $remote_user@$remote_node "cd ${abs_path_to_arch_repo}/scripts; ./postprocess.sh ${miniconda_loc} ${my_env} ${abs_path_to_data_repo}"
 
 echo "======> Stage PW logs to remote repo for committing"
-rsync -av ./logs.out $PW_USER@$remote_node:${abs_path_to_arch_repo}/output_data/logs.out
-#rsync -av ./std.err $PW_USER@$remote_node:${abs_path_to_arch_repo}/output_data/std.err
+rsync -av ./logs.out $remote_user@$remote_node:${abs_path_to_arch_repo}/output_data/logs.out
+#rsync -av ./std.err $remote_user@$remote_node:${abs_path_to_arch_repo}/output_data/std.err
 
 echo "===================================="
 echod Step 6: Stage files back to GitHub
 echo "=====> Add and commit..."
-ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git add --all ."
-ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"${jobnum} on $(date)\""
+ssh $remote_user@$remote_node "cd ${abs_path_to_arch_repo}; git add --all ."
+ssh $remote_user@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"${jobnum} on $(date)\""
 
 if [ $repos_push_to_gh = "true" ]; then
     echo "=====> Push..."
-    ssh ${PW_USER}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
-    ssh -O exit ${PW_USER}@${remote_node}
-    ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${PW_USER}@${remote_node} \"cd ${abs_path_to_arch_repo}; git push origin ${ml_arch_branch}\""
+    ssh ${remote_user}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
+    ssh -O exit ${remote_user}@${remote_node}
+    ssh-agent bash -c "ssh-add ${private_key}; ssh -A ${remote_user}@${remote_node} \"cd ${abs_path_to_arch_repo}; git push origin ${ml_arch_branch}\""
 fi
 
 echo "======> Stage files back to PW"
@@ -323,7 +328,7 @@ echo "======> Stage files back to PW"
 # series of job directories for consolidating
 # results rather than having to loop through
 # git commits.
-rsync -av $PW_USER@$remote_node:${abs_path_to_arch_repo}/ml_models ./
-rsync -av $PW_USER@$remote_node:${abs_path_to_arch_repo}/output_data ./
+rsync -av $remote_user@$remote_node:${abs_path_to_arch_repo}/ml_models ./
+rsync -av $remote_user@$remote_node:${abs_path_to_arch_repo}/output_data ./
 
 echo Done with $0
