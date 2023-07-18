@@ -173,7 +173,7 @@ echo "======> Clone repos to node..."
 
 # ML archive repo must be git cloned with ssh
 # b/c using ssh key for auth only if we want to push.
-if [ $repos_push_to_gh = "True" ]; then
+if [ $repos_push_to_gh = "true" ]; then
     # Must first exit any existing background/interactive SSH sessions
     # If a user has logged into the cluster and is viewing the progress
     # of the run, ssh -A will not work properly?
@@ -202,7 +202,7 @@ ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch ${ml_arch_bra
 echo "======> Checkout ${ml_arch_branch}..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git checkout ${ml_arch_branch}"
 
-if [ $repos_push_to_gh = "True" ]; then
+if [ $repos_push_to_gh = "true" ]; then
     echo "======> Set upstream branch in case branch exists already ${ml_arch_branch}..."
     ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git branch --set-upstream-to=origin/${ml_arch_branch} ${ml_arch_branch}"
     ssh ${PW_USER}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
@@ -305,7 +305,7 @@ echo "=====> Add and commit..."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git add --all ."
 ssh $PW_USER@$remote_node "cd ${abs_path_to_arch_repo}; git commit -m \"${jobnum} on $(date)\""
 
-if [ $repos_push_to_gh = "True" ]; then
+if [ $repos_push_to_gh = "true" ]; then
     echo "=====> Push..."
     ssh ${PW_USER}@${remote_node} "wall \"Interrupting session for workflow use of ssh -A\""
     ssh -O exit ${PW_USER}@${remote_node}
