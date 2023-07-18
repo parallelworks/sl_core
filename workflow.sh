@@ -171,6 +171,11 @@ echo "======> Clone repos to node..."
 # See detailed comments for what is happening here in:
 # https://github.com/parallelworks/dynamic-learning-rivers/blob/main/test_deploy_key.sh
 
+echo PARSL_CLIENT_HOST is $PARSL_CLIENT_HOST
+export PARSL_CLIENT_HOST="cloud.parallel.works"
+
+env | grep PARSL
+
 # ML archive repo must be git cloned with ssh
 # b/c using ssh key for auth only if we want to push.
 if [ $repos_push_to_gh = "true" ]; then
