@@ -5,7 +5,7 @@
       <param name='ml_arch_repo'
 	     label='ML archive repository'
 	     type='text'
-	     value='https://github.com/parallelworks/dynamic-learning-rivers'
+	     value='git@github.com:parallelworks/dynamic-learning-rivers'
 	     width='50%_none%'
 	     help='Repo MUST have SSH prefix, e.g. git@github.com:org/repo, for SSH auth w/ deploy keys to push'>
       </param>
@@ -19,7 +19,7 @@
              type='boolean'
              truevalue='Yes'
              falsevalue='No'
-             checked='false'
+             checked='true'
              label='Push results to GitHub'
              help='Select yes to push results to GitHub. A deploy key for the repo is required.'
              width='25%_none%'
@@ -98,7 +98,7 @@
 	     type='boolean'
 	     truevalue='Yes'
 	     falsevalue='No'
-	     checked='true'
+	     checked='false'
 	     label='Run hyperparameter optimization?'
 	     help='Select yes for hyperparameter tuning'
 	     width='25%_none%'
