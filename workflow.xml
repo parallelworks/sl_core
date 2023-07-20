@@ -59,7 +59,7 @@
 	     help='Specify name of Miniconda environment to use. There is a bug with using base!'>
       </param>
     </section>
-    <section name='superlearner' type='section' title='SuperLearner configuration' expanded='false'>
+    <section name='superlearner' type='section' title='SuperLearner configuration' expanded='False'>
       <param name='train_test_data'
 	     label='Data for training and testing [.csv] [Inputs, Outputs]'
 	     type='text'
