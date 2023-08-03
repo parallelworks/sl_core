@@ -463,7 +463,11 @@ if __name__ == '__main__':
             # Move to the next highest correlation
             abs_corr[abs_corr==current_highest_corr] = 0
             ii = ii + 1
-
+            # Scalar highest correlation in DF, duplicated to prevent
+            # last correlation which may be less than cutoff from
+            # getting merged with a group.
+            current_highest_corr = abs_corr.max().max()
+            
         # Any remaining features are permuted independently and so
         # by default do not need to be included in the group lists.
 
