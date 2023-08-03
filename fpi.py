@@ -41,7 +41,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MaxAbsScaler
 import seaborn as sns
-
+import igraph as ig
 import sys
 
 #=======================================
@@ -500,8 +500,8 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(15,15))
     corr = all_df.corr()
     short_names = [name[:12] for name in corr.columns]
-    sns.heatmap(ax=ax, data=np.abs(corr), xticklabels=short_names, yticklabels=short_names, cmap=sns.diverging_palette(220, 10, as_cmap=True,n=3))
-    plt.savefig(model_dir+'/sl_all_correlation_heatmap.png')
+    #sns.heatmap(ax=ax, data=np.abs(corr), xticklabels=short_names, yticklabels=short_names, cmap=sns.diverging_palette(220, 10, as_cmap=True,n=3))
+    #plt.savefig(model_dir+'/sl_all_correlation_heatmap.png')
 
     # Step 2: What is the distribution of correlations?
     # Is there a particular correlation cutoff that is relevant for this data set?
@@ -521,6 +521,46 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(15,15))
     sns.heatmap(ax=ax, data=np.abs(hot_spots), xticklabels=short_names, yticklabels=short_names, cmap=sns.diverging_palette(220, 10, as_cmap=True,n=3))
     plt.savefig(model_dir+'/sl_fpi_correlation_heatmap.png')    
+    
+    # Step 4: Visualize the correlations as a graph
+    # Based on examples at:
+    # https://python.igraph.org/en/stable/tutorials/online_user_actions.html#sphx-glr-tutorials-online-user-actions-py
+    # https://python.igraph.org/en/stable/tutorials/connected_components.html#sphx-glr-tutorials-connected-components-py
+    
+    # Get abs value of correlation
+    abs_corr = np.abs(corr)
+    
+    # Get rid of self correlations
+    # (but allowing for 1.0 correlations
+    # elsewhere, e.g. duplicate features)
+    feature_names_str = abs_corr.columns
+    for name in feature_names_str:
+        abs_corr.loc[name,name] = 0.0
+
+    # Get rid of correlations below the cutoff
+    abs_corr[abs_corr <= corr_cutoff] = 0.0
+
+    g = ig.Graph.Weighted_Adjacency(abs_corr, mode='plus')
+    components = g.connected_components(mode='weak')
+    #layout = g.layout('circle')
+    #vertex_size = g.closeness()
+    #vertex_size = [0.5 * v**2 if not np.isnan(v) else 0.05 for v in vertex_size]
+    fig, ax = plt.subplots()
+    ig.plot(
+        components,
+        target=ax,
+        palette=ig.RainbowPalette(),
+        vertex_size=1.0,
+        vertex_color=list(map(int, ig.rescale(components.membership, (0, 200), clamp=True))),
+        edge_width=1.0,
+        #layout=layout,
+        vertex_label=g.vs['name'],
+        vertex_label_size=10,
+        #vertex_color="lightblue",
+        #vertex_size=vertex_size,
+        #edge_width=g.es["weight"],
+    )
+    plt.savefig(model_dir+'/sl_fpi_correlation_graph.png')
 
     #===========================================================
     # Run FPI

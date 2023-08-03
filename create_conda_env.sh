@@ -119,6 +119,7 @@ conda install -y -c conda-forge scikit-optimize${sklopt_version}
 conda install -y -c conda-forge onnxmltools
 conda install -y -c conda-forge onnxruntime
 conda install -y seaborn
+conda install -c conda-forge python-igraph
 
 # Pip packages last
 # SMOGN on pip does not allow for seed option.  Use dev.
