@@ -503,14 +503,6 @@ if __name__ == '__main__':
     sns.heatmap(ax=ax, data=np.abs(corr), xticklabels=short_names, yticklabels=short_names, cmap=sns.diverging_palette(220, 10, as_cmap=True,n=3))
     plt.savefig(model_dir+'/sl_all_correlation_heatmap.png')
 
-    group_correlated_features(
-        corr,
-        corr_cutoff=0.5,
-        merge_groups=True,
-        onehot_list=['General_Vegetation','River_Gradient','Sediment','Deposition','Hydrogeomorphology'],
-        verbose=False
-    )
-
     # Step 2: What is the distribution of correlations?
     # Is there a particular correlation cutoff that is relevant for this data set?
     # In processing corr for plotting, first grab the lower triangle of the correlation
@@ -542,6 +534,8 @@ if __name__ == '__main__':
         merge_groups=True,
         onehot_list=['General_Vegetation','River_Gradient','Sediment','Deposition','Hydrogeomorphology'],
         verbose=False)
+    # Verify that permute_str is always the same
+    print(permute_str)
 
     #==========================================================
     # Run FPI for stacked model and each individual submodel
@@ -600,30 +594,13 @@ if __name__ == '__main__':
     model_fpi_results_df = pd.concat(model_fpi_results,axis=1)
 
     # Stacked model results
-    print(sl_fpi_results_df.sort_values(by='Avg_Ratiostack'+str(jobid),axis=0,ascending=False))
+    print(sl_fpi_results_df)
 
     # All other model results
     for model in sl_models:
         print('--------'+model+'---------')
-        print(model_fpi_results_df['Avg_Ratio'+model+str(jobid)].sort_values(axis=0,ascending=False))
-    
-    #===========================================================
-    # Make heatmap of variable correlations
-    #===========================================================
-    
-    # Working here
-
-    # To view a particular model's list,
-    # Choose from ['nusvr', 'mlp', 'ridge', 'xgb']
-    # Choose from ['Avg_Ratio', 'Std_Ratio']
-    print(pd.DataFrame(
-        model_fpi_results_df.filter(
-            like='nusvr',axis=1).filter(
-            like='Avg_Ratio',axis=1).mean(axis=1)).sort_values(
-                by=0,
-                axis=0,
-                ascending=False))
-    
+        print(model_fpi_results_df['Avg_Ratio'+model+str(jobid)])
+       
     #===========================================================
     # Save outfile file
     #===========================================================
