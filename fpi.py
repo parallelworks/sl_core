@@ -146,7 +146,7 @@ if __name__ == '__main__':
     #==========================================================
 
     #----------------------------------------------------------
-    def permute_importance(permutation_feature_blocks_str, model, X, y, scoring_func, n_repeats=20, ratio_score=True):
+    def permute_importance(permutation_feature_blocks_str, model, X, y, scoring_func, n_repeats=20, ratio_score=True, verbose=False):
 
         base_preds = model.predict(X.values)
         base_score = scoring_func(y, base_preds)
@@ -158,7 +158,8 @@ if __name__ == '__main__':
             block_df = X.copy()
             repeat_scores = list()
             for i_repeat in range(n_repeats):
-                print('For block '+block[0]+' iteration '+str(i_repeat))
+                if verbose:
+                    print('For block '+block[0]+' iteration '+str(i_repeat))
                 block_df[block] = shuffle(block_df[block]).values
                 repeat_preds = model.predict(block_df.values)
                 repeat_scores.append(scoring_func(y, repeat_preds))
