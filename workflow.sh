@@ -115,11 +115,17 @@ echo " "
 remote_node=${repos_whost_publicIp}
 remote_user=${repos_whost_username}
 
-# Private key created with ssh-keygen -t ed25519
-private_key="/home/${PW_USER}/.ssh/id_ed25519_dynamic-learning-rivers"
-
 # The repository we want to pull, modify, and push back
 ml_arch_repo=$repos_ml_arch_repo
+
+# Private deploy key created with ssh-keygen -t ed25519
+# associated with repo we want to push back to.
+# AUTOMATICALLY builds deploy key name from ml_arch_repo.
+# ASSUMES all keys are in ~/.ssh and named id_ed25519_<gh_org>_<gh_repo>
+# for the GitHub organization name and repo name, e.g.
+# id_ed25519_parallelworks_dynamic-learning-rivers
+key_root_name=`echo $ml_arch_repo | sed 's/:/ /g' | sed 's/\// /g' | sed 's/@/ /g' | sed 's/.git/ /g' | awk '{print $3"_"$4}'`
+private_key="/home/${PW_USER}/.ssh/id_ed25519_$key_root_name"
 
 # The branch of the ml_archive repository we want to use
 ml_arch_branch=$repos_ml_arch_branch
