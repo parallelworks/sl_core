@@ -570,13 +570,36 @@ if __name__ == '__main__':
     # Run FPI
     #===========================================================
 
-    # general settings
+    # General settings
     job_list = [jobid]
+    
+    #---Automatically detect any one-hot features---
+    # 1) Get names of one-hot features
+    one_hot_all_list = list(all_df.filter(like='_-1hot-_').columns)
+    
+    # 2) Loop over all elements in list, and split based on
+    # _-1hot-_
+    tmp_list = []
+    for feature in one_hot_all_list:
+        tmp_list.append(feature.split('_-1hot-_')[0])
+    
+    # 3) Convert to a set to retain unique values, then to list for ease of use
+    # List will be empty if there are no _-1hot-_ flagged values.
+    one_hot_feature_list = list(set(tmp_list))
+    if len(one_hot_feature_list) == 0:
+        print('Did not detect any one-hot features.')
+    else:
+        print('Dectected one-hot features:')
+        print(one_hot_feature_list)
+
+    #---Automatically find correlated features---
+    # While the graph visualizer (above) is really nice, it may not work in
+    # all cases 
     permute_str = group_correlated_features(
         corr,
         corr_cutoff=0.5,
         merge_groups=True,
-        onehot_list=['General_Vegetation','River_Gradient','Sediment','Deposition','Hydrogeomorphology'],
+        onehot_list=one_hot_feature_list,
         verbose=False)
     # Verify that permute_str is always the same
     print(permute_str)
