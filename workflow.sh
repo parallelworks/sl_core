@@ -267,6 +267,7 @@ echo "======> Launching SuperLearner"
 # the end of the command.
 echo "WARNING: Target variable name is hard coded here!"
 ssh -f ${ssh_options} $remote_user@$remote_node sbatch" "\
+--exclusive" "\
 --output=sl.std.out.${remote_node}" "\
 --wrap" ""\"cd ${abs_path_to_code_repo}; ./train_predict_eval.sh "\
 "${abs_path_to_arch_repo}/${superlearner_train_test_data} "\

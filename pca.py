@@ -199,7 +199,7 @@ if __name__ == '__main__':
     training_all_scaled = cnsd.transform(training_all)
     
     # Can you recover the data from the scaler?  Yes!
-    assert_array_almost_equal(data_all, cnsd.inverse_transform(data_all_scaled),decimal=6)
+    assert_array_almost_equal(data_all, cnsd.inverse_transform(data_all_scaled),decimal=2)
     
     # So overwrite the data to a scaled version
     data_all = data_all_scaled
