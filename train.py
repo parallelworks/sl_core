@@ -381,6 +381,26 @@ if __name__ == '__main__':
         with joblib.parallel_backend(args.backend, **backend_params):
             ho_metrics[oname] = SuperLearners[oname].score(X_test, Y_test[:, oi])
 
+    # Evaluate SuperLearners on the test(holdout) set with a high/low respiration rate split:
+    try: 
+        # Separate into high and low datasets
+        threshold = -500
+        test = np.concatenate((X_test, Y_test), axis=1)
+        test_high = np.delete(test, np.where(test[:, int(args.num_inputs)] >= threshold)[0], axis=0)
+        test_low = np.delete(test, np.where(test[:, int(args.num_inputs)] < threshold)[0], axis=0)
+        X_test_high = test_high[:, :int(args.num_inputs)]
+        Y_test_high = test_high[:, int(args.num_inputs):]
+        X_test_low = test_low[:, :int(args.num_inputs)]
+        Y_test_low = test_low[:, int(args.num_inputs):]
+        
+        for oi, oname in enumerate(onames):
+            print('Evaluating estimator on holdout(test) high/low set for output: ' + oname, flush = True)
+            with joblib.parallel_backend(args.backend, **backend_params):
+                ho_metrics[f"{oname}_high"] = SuperLearners[oname].score(X_test_high, Y_test_high[:, oi])
+                ho_metrics[f"{oname}_low"] = SuperLearners[oname].score(X_test_low, Y_test_low[:, oi])
+    except Exception as e :
+        print(f"Evaluating the SuperLearner on a test(holdout) set with a high and low respiration rate split failed: {e}")
+
     print('Hold out metrics:', flush = True)
     print(json.dumps(ho_metrics, indent = 4), flush = True)
     with open(args.model_dir + '/hold-out-metrics.json', 'w') as json_file:
