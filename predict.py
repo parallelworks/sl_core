@@ -158,6 +158,15 @@ if __name__ == '__main__':
     # Causes workflow to crash, not very useful, comment out.
     #print("RSE vs s: "+str(np.corrcoef(rse,s*np.ones(np.shape(Y_test)))))
     
+    # Print out data used in plot below so plot can be recreated
+    df_train_scatter_out = pd.DataFrame(data=np.squeeze(Y_train), columns=['target'])
+    df_train_scatter_out['predicted'] = np.squeeze(Y_hat_train)
+    df_train_scatter_out.to_csv('sl_scatter_train.csv')
+    
+    df_test_scatter_out = pd.DataFrame(data=np.squeeze(Y_test), columns=['target'])
+    df_test_scatter_out['predicted'] = np.squeeze(Y_hat_test)
+    df_test_scatter_out.to_csv('sl_scatter_test.csv')
+    
     #===========================================================
     # Make an evaluation plot
     #===========================================================
