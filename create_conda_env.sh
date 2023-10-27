@@ -99,7 +99,7 @@ sklopt_version=""
 scipy_version=""
 # There is an issue with skopt using depreciated np.int, so 
 # pin numpy to version that accepts np.int.
-numpy_version="=1.22.3"
+numpy_version="==1.22.3"
 
 # Start conda
 source ${miniconda_loc}/etc/profile.d/conda.sh
@@ -114,7 +114,6 @@ conda activate $my_env
 
 # Install packages
 conda install -y -c conda-forge scipy${scipy_version}
-conda install -y numpy${numpy_version}
 conda install -y pandas
 conda install -y matplotlib
 conda install -y scikit-learn${sklearn_version}
@@ -123,6 +122,7 @@ conda install -y -c conda-forge scikit-optimize${sklopt_version}
 conda install -y -c conda-forge onnxmltools
 conda install -y -c conda-forge onnxruntime
 conda install -y seaborn
+conda install -y numpy${numpy_version}
 
 # Pip packages last
 # SMOGN on pip does not allow for seed option.  Use dev.
