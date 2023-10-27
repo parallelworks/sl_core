@@ -114,6 +114,7 @@ conda activate $my_env
 
 # Install packages
 conda install -y -c conda-forge scipy${scipy_version}
+conda install -y numpy${numpy_version}
 conda install -y pandas
 conda install -y matplotlib
 conda install -y scikit-learn${sklearn_version}
@@ -122,7 +123,6 @@ conda install -y -c conda-forge scikit-optimize${sklopt_version}
 conda install -y -c conda-forge onnxmltools
 conda install -y -c conda-forge onnxruntime
 conda install -y seaborn
-conda install -y numpy${numpy_version}
 
 # Pip packages last
 # SMOGN on pip does not allow for seed option.  Use dev.
@@ -133,5 +133,8 @@ pip install git+https://github.com/nickkunz/smogn.git
 # and takes a very long time to solve env.  Perhaps a
 # choice of Python issue? Bypass with pip.
 pip install igraph==0.10.6
+
+# Force the numpy version to match what we need
+conda install -y numpy${numpy_version}
 
 echo Finished $0
