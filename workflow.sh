@@ -257,6 +257,8 @@ for (( ii=0; ii<$superlearner_num_inst; ii++ ))
 do
 # Launch a single SuperLearner job
 work_dir=${abs_path_to_arch_repo}/${work_dir_base}${ii}
+echo "=======> Deleting any existing data in ${work_dir}"
+ssh $remote_user@$remote_node "rm -rf ${work_dir}"
 echo "=======> Creating work dir: ${work_dir}"
 ssh $remote_user@$remote_node "mkdir -p ${work_dir}"
 
