@@ -40,7 +40,7 @@ import joblib; print(joblib.__version__)
 import pandas as pd
 import math
 import numpy as np
-import smogn
+#import smogn
 
 import importlib
 

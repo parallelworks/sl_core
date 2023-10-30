@@ -127,7 +127,7 @@ conda install -y seaborn
 # Pip packages last
 # SMOGN on pip does not allow for seed option.  Use dev.
 #pip install smogn
-pip install git+https://github.com/nickkunz/smogn.git
+#pip install git+https://github.com/nickkunz/smogn.git
 
 # conda install -c conda-forge python-igraph installs v0.9.x
 # and takes a very long time to solve env.  Perhaps a
