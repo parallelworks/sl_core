@@ -96,7 +96,7 @@ conda activate $my_env
 # Provide both conda list and 
 # conda env export.
 conda list -e | gzip -1c > ${work_dir}/requirements.txt.gz
-conda env export | gzip -1c > ${work_dir}requirements.yaml.gz
+conda env export | gzip -1c > ${work_dir}/requirements.yaml.gz
 
 #===================================
 # Run the SuperLearner
