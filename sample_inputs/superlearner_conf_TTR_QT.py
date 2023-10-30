@@ -1,24 +1,20 @@
 # SuperLearner configuration for:
 # 13 stacked ensemble models
 # Each uses MinMaxScaler or StandardScaler on inputs
-# Each uses TransformedTargetRegressor with custom Yeo-Johson
-# function/inverse pair on targets.
+# Each uses TransformedTargetRegressor with QuantileTransformer on targets
 #
-# YJ works well to transfor non-Guassian distributed data
+# PT works well to transfor non-Guassian distributed data
 # into a bell curve (i.e. log distributions) and it is less
 # prone to over-fitting than the QuantileTransformer for
-# small data sets. Scikit-learn implements the Yeo-Johnson
-# algorithm in the PowerTransformer, but there are occasinally
-# some NaN values that arise during execution that cause crashes.
-# Here, I implement YJ as a custom function/inverse pair to 
-# explicitly check for NaNs.
+# small data sets. I also like the way that PT's Yeo-Johnson
+# algorithm is well-documented and easy to understand.
 
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.base import BaseEstimator,RegressorMixin
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import PowerTransformer
+from sklearn.preprocessing import QuantileTransformer
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Lasso
@@ -66,93 +62,6 @@ class NonNegativeLeastSquares(BaseEstimator, RegressorMixin):
         return np.matmul(X, self.weights_)
 
 
-# _neg values apply -1 assuming all input values
-# are negative, so the log operation can work on
-# positive values.
-
-mms_min = -2.0
-mms_max = 4.0
-
-def mms_log10_neg(input):
-
-    #print(mms_min)
-    #print(mms_max)
-    
-    # MinMaxScaler should have all values between 0 and 1.
-    max_val = 1
-    min_val = 0
-    
-    # Apply log10 transform
-    do_log10 = np.log10(-1.0*input)
-
-    # Apply MinMaxScaler
-    output = (do_log10 - mms_min)/(mms_max - mms_min)
-
-    # Count bad values
-    #num_too_big=np.sum(np.sum(output > max_val))
-    #num_too_small=np.sum(np.sum(output < min_val))
-    #print('Transform: Num too big: '+str(num_too_big)+' Num too small: '+str(num_too_small))
-
-    # Filter values
-    output[output > max_val] = max_val
-    output[output < min_val] = min_val
-
-    return output
-
-    #print('Function: '+str(np.sum(np.sum(output > max_val))))
-    #print('Inp Min: '+str(np.min(input))+' Max: '+str(np.max(input)))
-    #print('Out Min: '+str(np.min(output))+' Max: '+str(np.max(output)))
-    #print('Nans: '+str(np.sum(np.sum(np.isnan(output)))))
-    #max_val = np.log1p(np.finfo(np.float64).max/2)
-    #output = np.log1p(np.abs(input))
-    #print(np.sum(np.sum(output > max_val)))
-    #output[output < -1.0*max_val]=-1.0*max_val
-    #output[output < 0.0] = 0.0
-    #output[output > max_val] = max_val
-    #return output
-
-def neg_exp10_mms(input):
-    #print(mms_min)
-    #print(mms_max)
-
-    #max_val = np.finfo(np.float32).max
-    #min_val = np.finfo(np.float32).eps
-
-    # Prefilter before apply MinMaxScaler
-    input[input < 0.0] = 0
-    input[input > 1.0] = 1
-
-    # Undo MinMaxScaler
-    undo_mms = input*(mms_max-mms_min) + mms_min
-
-    # Undo the log10 transform
-    output = (10.0**undo_mms)
-
-    # Check output is reasonable
-    #num_too_big=np.sum(np.sum(output > max_val))
-    #num_too_small=np.sum(np.sum(output < min_val))
-    #print('Inverse: Num too big: '+str(num_too_big)+' Num too small: '+str(num_too_small))
-    #output[output > max_val] = max_val
-    #output[output < min_val] = min_val
-    #output[np.isnan(output)] = min_val
-    #output[np.isinf(output)] = max_val
-
-    # Make all values negative.
-    output = -1.0*output
-    
-    return output
-
-    #print('Inverse: '+str(np.sum(np.sum(output > max_val))))
-    #print('Inp Min: '+str(np.min(input))+' Max: '+str(np.max(input)))
-    #print('Out Min: '+str(np.min(output))+' Max: '+str(np.max(output)))
-    #print('Nans: '+str(np.sum(np.sum(np.isnan(output)))))
-    #max_val = np.log1p(np.finfo(np.float64).max/2)
-    #input_copy = input
-    #input_copy[input_copy > max_val] = max_val
-    #input_copy[input_copy < -1.0*max_val] = -1.0*max_val
-    #output = -1.0*np.expm1(input_copy)
-    #return output
-
 n_iter = 10
 cv = 5
 
@@ -186,7 +95,7 @@ SuperLearnerConf = {
                         ('svr', NuSVR(kernel='rbf'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -196,7 +105,7 @@ SuperLearnerConf = {
                             ('svr', NuSVR(kernel='rbf'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__svr__C": (10**-6, 10**2.5, 'log-uniform'),
@@ -215,7 +124,7 @@ SuperLearnerConf = {
                         ('svr', NuSVR(kernel='linear'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -225,7 +134,7 @@ SuperLearnerConf = {
                             ('svr', NuSVR(kernel='linear'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__svr__C": (10**-6, 10**2.5, 'log-uniform'),
@@ -243,7 +152,7 @@ SuperLearnerConf = {
                         ('svr', NuSVR(kernel='poly'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -253,7 +162,7 @@ SuperLearnerConf = {
                             ('svr', NuSVR(kernel='poly'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__svr__C": (10**-6, 10**2.5, 'log-uniform'),
@@ -272,7 +181,7 @@ SuperLearnerConf = {
                         ('svr', NuSVR(kernel='sigmoid'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -282,7 +191,7 @@ SuperLearnerConf = {
                             ('svr', NuSVR(kernel='sigmoid'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__svr__C": (10**-6, 10**2.5, 'log-uniform'),
@@ -301,7 +210,7 @@ SuperLearnerConf = {
                         ('knn', KNeighborsRegressor(weights='uniform'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -311,7 +220,7 @@ SuperLearnerConf = {
                             ('knn', KNeighborsRegressor(weights='uniform'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__knn__n_neighbors": (1, 10, 'uniform')
@@ -328,7 +237,7 @@ SuperLearnerConf = {
                         ('knn', KNeighborsRegressor(weights='distance'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -338,7 +247,7 @@ SuperLearnerConf = {
                             ('knn', KNeighborsRegressor(weights='distance'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__knn__n_neighbors": (1, 10, 'uniform')
@@ -355,7 +264,7 @@ SuperLearnerConf = {
                         ('plsr', PLSRegression())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -365,7 +274,7 @@ SuperLearnerConf = {
                             ('plsr', PLSRegression())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__plsr__n_components": (1, 10, 'uniform')
@@ -382,7 +291,7 @@ SuperLearnerConf = {
                         ('mlp', MLPRegressor())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -392,7 +301,7 @@ SuperLearnerConf = {
                             ('mlp', MLPRegressor())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__mlp__hidden_layer_sizes": (10, 250),
@@ -413,7 +322,7 @@ SuperLearnerConf = {
                         ('linear', Ridge())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -424,7 +333,7 @@ SuperLearnerConf = {
                             ('linear', Ridge())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__poly__degree": [1, 2, 3],
@@ -443,7 +352,7 @@ SuperLearnerConf = {
                         ('linear', Lasso())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -454,7 +363,7 @@ SuperLearnerConf = {
                             ('linear', Lasso())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__poly__degree": [1, 2, 3],
@@ -473,7 +382,7 @@ SuperLearnerConf = {
                         ('linear', LinearRegression())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -484,7 +393,7 @@ SuperLearnerConf = {
                             ('linear', LinearRegression())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__poly__degree": [1, 2, 3]
@@ -502,7 +411,7 @@ SuperLearnerConf = {
                         ('linear', ElasticNet())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -513,7 +422,7 @@ SuperLearnerConf = {
                             ('linear', ElasticNet())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__poly__degree": [1, 2, 3],
@@ -533,7 +442,7 @@ SuperLearnerConf = {
                         ('linear', HuberRegressor())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -544,7 +453,7 @@ SuperLearnerConf = {
                             ('linear', HuberRegressor())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__poly__degree": [1, 2, 3],
@@ -563,7 +472,7 @@ SuperLearnerConf = {
                         ('xgb', XGBRegressor(objective = 'reg:squarederror'))
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -573,7 +482,7 @@ SuperLearnerConf = {
                             ('xgb', XGBRegressor(objective = 'reg:squarederror'))
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__xgb__n_estimators": (100, 10000),
@@ -592,7 +501,7 @@ SuperLearnerConf = {
                         ('etr', ExtraTreesRegressor())
                     ]
                 ),
-                func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                transformer = QuantileTransformer(output_distribution='normal')
             ),
             "hpo": BayesSearchCV(
                 TransformedTargetRegressor(
@@ -602,7 +511,7 @@ SuperLearnerConf = {
                             ('etr', ExtraTreesRegressor())
                         ]
                     ),
-                    func=log1p_neg, inverse_func=expm1_neg, check_inverse=True
+                    transformer = QuantileTransformer(output_distribution='normal')
                 ),
                 {
                     "regressor__etr__n_estimators": (100, 10000),
