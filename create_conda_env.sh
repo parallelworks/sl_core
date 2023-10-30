@@ -99,7 +99,7 @@ sklopt_version=""
 scipy_version=""
 # There is an issue with skopt using depreciated np.int, so 
 # pin numpy to version that accepts np.int.
-numpy_version="==1.22.3"
+numpy_version="==1.22.4"
 
 # Start conda
 source ${miniconda_loc}/etc/profile.d/conda.sh
