@@ -9,15 +9,18 @@
 import argparse
 import pickle
 import pandas as pd
+import json
 import numpy as np
 import matplotlib.pyplot as plt
+import sklearn.metrics
 from sklearn.metrics import mean_squared_error
 from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MaxAbsScaler
 import sys
-from pprint import pprint
+from pprint import print
+
 
 #=======================================
 # Main execution
@@ -166,6 +169,23 @@ if __name__ == '__main__':
     df_test_scatter_out = pd.DataFrame(data=np.squeeze(Y_test), columns=['target'])
     df_test_scatter_out['predicted'] = np.squeeze(Y_hat_test)
     df_test_scatter_out.to_csv(model_dir+'/sl_scatter_test.csv')
+
+    # Evaluate using a high/low split  
+    print("evaluating hold out on a high/low split")
+    threshold = -500
+    ho_metrics = {}
+    
+    sl_scatter_test_high = np.delete(df_test_scatter_out, np.where(df_test_scatter_out["predicted"] >= threshold)[0], axis=0)
+    sl_scatter_test_low = np.delete(df_test_scatter_out, np.where(df_test_scatter_out["predicted"] < threshold)[0], axis=0)
+    
+    sl_scatter_test_high = pd.DataFrame(sl_scatter_test_high, columns = df_test_scatter_out.columns)
+    sl_scatter_test_low = pd.DataFrame(sl_scatter_test_low, columns = df_test_scatter_out.columns)
+
+    ho_metrics["r2_high"] = sklearn.metrics.r2_score(sl_scatter_test_high["target"], sl_scatter_test_high["predicted"])
+    ho_metrics["r2_low"] = sklearn.metrics.r2_score(sl_scatter_test_low["target"], sl_scatter_test_low["predicted"])
+
+    with open(args.model_dir + '/hold-out-metrics-high-low-split.json', 'w') as json_file:
+        json.dump(ho_metrics, json_file, indent = 4)
     
     #===========================================================
     # Make an evaluation plot
