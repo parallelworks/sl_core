@@ -97,6 +97,9 @@ sklearn_version=""
 xgboost_version=""
 sklopt_version=""
 scipy_version=""
+# There is an issue with skopt using depreciated np.int, so 
+# pin numpy to version that accepts np.int.
+numpy_version="==1.22.4"
 
 # Start conda
 source ${miniconda_loc}/etc/profile.d/conda.sh
@@ -111,6 +114,7 @@ conda activate $my_env
 
 # Install packages
 conda install -y -c conda-forge scipy${scipy_version}
+conda install -y -c conda-forge numpy${numpy_version}
 conda install -y pandas
 conda install -y matplotlib
 conda install -y scikit-learn${sklearn_version}
@@ -123,11 +127,14 @@ conda install -y seaborn
 # Pip packages last
 # SMOGN on pip does not allow for seed option.  Use dev.
 #pip install smogn
-pip install git+https://github.com/nickkunz/smogn.git
+#pip install git+https://github.com/nickkunz/smogn.git
 
 # conda install -c conda-forge python-igraph installs v0.9.x
 # and takes a very long time to solve env.  Perhaps a
 # choice of Python issue? Bypass with pip.
 pip install igraph==0.10.6
+
+# Force the numpy version to match what we need
+conda install -c conda-forge -y numpy${numpy_version}
 
 echo Finished $0
