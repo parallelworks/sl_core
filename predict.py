@@ -243,7 +243,11 @@ if __name__ == '__main__':
     #===========================================================
     
     # Put the predictions with lon lat data separated beforehand.
-    output_df = pd.read_csv(predict_data_ixy)
+    # This is from the ixy file which when running FPI analysis
+    # may include the dropped features as columns. Therefore, only
+    # pick out the ID, lon, lat for use later.
+    output_df = pd.read_csv(predict_data_ixy, 
+        usecols=['Sample_ID', 'Sample_Longitude', 'Sample_Latitude'])
         
     output_df[predict_var] = pd.Series(Y_predict)
     output_df['mean.error'] = pd.Series(Y_hat_error)
