@@ -161,6 +161,14 @@
              value='10'
              width='25%'>
       </param>
+      <param name='fpi_corr_cutoff'
+             label='Correlation cutoff for FPI'
+             type='float'
+             min='0.01'
+             max='0.99'
+             value='0.5'
+             width='25%'>
+      </param>
     </section>
   </inputs>
   <outputs>
