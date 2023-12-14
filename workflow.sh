@@ -291,7 +291,7 @@ ssh -f ${ssh_options} $remote_user@$remote_node sbatch" "\
 "${superlearner_n_jobs} "\
 "${superlearner_backend} "\
 "Normalized_Respiration_Rate_mg_DO_per_H_per_L_sediment "\
-"${abs_path_to_arch_repo}/${superlearner_predict_data}"\
+"${abs_path_to_arch_repo}/${superlearner_predict_data} "\
 "${superlearner_fpi_corr_cutoff}""\""
 done
 
