@@ -178,7 +178,7 @@ echo " "
 echo "FPI correlation cutoff"
 echo fpi_corr_cutoff: $superlearner_fpi_corr_cutoff
 echo Convert from percentage to decimal...
-$superlearner_fpi_corr_cutoff=`echo $superlearner_fpi_corr_cutoff | awk '{print $1/100}'`
+superlearner_fpi_corr_cutoff=`echo $superlearner_fpi_corr_cutoff | awk '{print $1/100}'`
 echo fpi_corr_cutoff: $superlearner_fpi_corr_cutoff
 echo "===================================="
 echod Step 2: Cluster setup - staging files to head node
