@@ -168,7 +168,7 @@
              max='99'
              value='50'
              width='25%'
-             help='Percent variability explained in correlation between features; features correlated above this level will be grouped in FPI analysis.'>
+             help='Features correlated above this level will be grouped in FPI analysis. This is correlation on scale of 0 to 100 (instead of 0 to 1), but not R^2!'>
       </param>
     </section>
   </inputs>

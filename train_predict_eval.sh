@@ -24,6 +24,7 @@
 #               $BACKEND \
 #               $PREDICT_VAR \               #-----Predict opts------
 #               /path/to/predict_data
+#               $FPI_CUTOFF                  #-----FPI opts----------
 #====================================
 
 echo Starting $0
@@ -62,6 +63,9 @@ backend=${12}
 predict_var=${13}
 predict_data=${14}
 
+# FPI options
+fpi_cutoff=${15}
+
 echo Checking command line inputs:
 echo input_data $input_data
 echo num_inputs $num_inputs
@@ -77,6 +81,7 @@ echo num_jobs $num_jobs
 echo backend $backend
 echo predict_var $predict_var
 echo predict_data $predict_data
+echo fpi_cutoff $fpi_cutoff
 
 #===================================
 # Conda activate and log env
@@ -144,6 +149,7 @@ python -m fpi \
        --model_dir ${work_dir} \
        --predict_var ${predict_var} \
        --num_inputs ${num_inputs} \
+       --corr_cutoff ${fpi_cutoff} \
        --predict_data ${predict_data} 1> ${work_dir}/fpi.std.out 2> ${work_dir}/fpi.std.err
 
 #===================================

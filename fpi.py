@@ -520,7 +520,7 @@ if __name__ == '__main__':
     # Data that are inherently linked (i.e. one-hot and categorical features)?
     # Expert knowledge?
     # Cluster remaining data based on correlation?
-    corr_cutoff = 0.5
+    corr_cutoff = args.corr_cutoff
     hot_spots = corr[np.abs(corr) >= corr_cutoff]
     fig, ax = plt.subplots(figsize=(15,15))
     sns.heatmap(ax=ax, data=np.abs(hot_spots), xticklabels=short_names, yticklabels=short_names, cmap=sns.diverging_palette(220, 10, as_cmap=True,n=3))
@@ -597,7 +597,7 @@ if __name__ == '__main__':
     # all cases 
     permute_str = group_correlated_features(
         corr,
-        corr_cutoff=0.5,
+        corr_cutoff=args.corr_cutoff,
         merge_groups=True,
         onehot_list=one_hot_feature_list,
         verbose=False)

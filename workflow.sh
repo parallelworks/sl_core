@@ -174,6 +174,12 @@ echo Working dir basename: $work_dir_base
 echo " "
 echo "Number of instances"
 echo num_inst: $superlearner_num_inst
+echo " "
+echo "FPI correlation cutoff"
+echo fpi_corr_cutoff: $superlearner_fpi_corr_cutoff
+echo Convert from percentage to decimal...
+$superlearner_fpi_corr_cutoff=`echo $superlearner_fpi_corr_cutoff | awk '{print $1/100}'`
+echo fpi_corr_cutoff: $superlearner_fpi_corr_cutoff
 echo "===================================="
 echod Step 2: Cluster setup - staging files to head node
 echo " "
@@ -285,7 +291,8 @@ ssh -f ${ssh_options} $remote_user@$remote_node sbatch" "\
 "${superlearner_n_jobs} "\
 "${superlearner_backend} "\
 "Normalized_Respiration_Rate_mg_DO_per_H_per_L_sediment "\
-"${abs_path_to_arch_repo}/${superlearner_predict_data}""\""
+"${abs_path_to_arch_repo}/${superlearner_predict_data}"\
+"${superlearner_fpi_corr_cutoff}""\""
 done
 
 echo "===================================="
