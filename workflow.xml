@@ -164,10 +164,11 @@
       <param name='fpi_corr_cutoff'
              label='Correlation cutoff for FPI'
              type='integer'
-             min='0.01'
-             max='0.99'
-             value='0.5'
-             width='25%'>
+             min='1'
+             max='99'
+             value='50'
+             width='25%'
+             help='Percent variability explained in correlation between features; features correlated above this level will be grouped in FPI analysis.'>
       </param>
     </section>
   </inputs>
