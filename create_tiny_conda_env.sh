@@ -108,15 +108,15 @@ conda activate base
 conda create -y --name $my_env python${python_version}
 
 # Jump into new environment
-conda activate $my_env
+#conda activate $my_env
 
 # Install packages
-conda install -y -c conda-forge dask
-conda install -y -c conda-forge distributed
+#conda install -y -c conda-forge dask
+#conda install -y -c conda-forge distributed
 
 # Pip packages last
 
 # Force the numpy version to match what we need
-conda install -c conda-forge -y numpy${numpy_version}
+#conda install -c conda-forge -y numpy${numpy_version}
 
 echo Finished $0
