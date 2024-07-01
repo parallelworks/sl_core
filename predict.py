@@ -169,22 +169,28 @@ if __name__ == '__main__':
     df_test_scatter_out['predicted'] = np.squeeze(Y_hat_test)
     df_test_scatter_out.to_csv(model_dir+'/sl_scatter_test.csv')
 
-    # Evaluate using a high/low split  
-    print("evaluating hold out on a high/low split")
-    threshold = -500
-    ho_metrics = {}
+    # Evaluate using a high/low split
+    # Commenting out for now since this can be run offline with
+    # the archived data. For some datasets, this code will result
+    # in a crash if they don't have any data points in either the
+    # high or low category. To reactiveate this code, need to
+    # implement a check for the number of points in each
+    # category.
+    #print("evaluating hold out on a high/low split")
+    #threshold = -500
+    #ho_metrics = {}
     
-    sl_scatter_test_high = np.delete(df_test_scatter_out, np.where(df_test_scatter_out["predicted"] >= threshold)[0], axis=0)
-    sl_scatter_test_low = np.delete(df_test_scatter_out, np.where(df_test_scatter_out["predicted"] < threshold)[0], axis=0)
+    #sl_scatter_test_high = np.delete(df_test_scatter_out, np.where(df_test_scatter_out["predicted"] >= threshold)[0], axis=0)
+    #sl_scatter_test_low = np.delete(df_test_scatter_out, np.where(df_test_scatter_out["predicted"] < threshold)[0], axis=0)
     
-    sl_scatter_test_high = pd.DataFrame(sl_scatter_test_high, columns = df_test_scatter_out.columns)
-    sl_scatter_test_low = pd.DataFrame(sl_scatter_test_low, columns = df_test_scatter_out.columns)
+    #sl_scatter_test_high = pd.DataFrame(sl_scatter_test_high, columns = df_test_scatter_out.columns)
+    #sl_scatter_test_low = pd.DataFrame(sl_scatter_test_low, columns = df_test_scatter_out.columns)
 
-    ho_metrics["r2_high"] = sklearn.metrics.r2_score(sl_scatter_test_high["target"], sl_scatter_test_high["predicted"])
-    ho_metrics["r2_low"] = sklearn.metrics.r2_score(sl_scatter_test_low["target"], sl_scatter_test_low["predicted"])
+    #ho_metrics["r2_high"] = sklearn.metrics.r2_score(sl_scatter_test_high["target"], sl_scatter_test_high["predicted"])
+    #ho_metrics["r2_low"] = sklearn.metrics.r2_score(sl_scatter_test_low["target"], sl_scatter_test_low["predicted"])
 
-    with open(args.model_dir + '/hold-out-metrics-high-low-split.json', 'w') as json_file:
-        json.dump(ho_metrics, json_file, indent = 4)
+    #with open(args.model_dir + '/hold-out-metrics-high-low-split.json', 'w') as json_file:
+    #    json.dump(ho_metrics, json_file, indent = 4)
     
     #===========================================================
     # Make an evaluation plot
