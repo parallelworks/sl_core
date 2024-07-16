@@ -1,6 +1,6 @@
 {
     "repo": "https://github.com/parallelworks/sl_core.git",
-    "branch": "main",
+    "branch": "canary",
     "dir": ".",
     "xml": "workflow.xml",
     "thumbnail": "superlearner.png",
