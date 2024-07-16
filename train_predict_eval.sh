@@ -7,7 +7,7 @@
 # 2) the number of inputs
 # 3) the SuperLearner configuration,
 # 4) the working directory,
-# 5) Boolean flags (HPO, CV, SMOGN, ONNX) 
+# 5) Boolean flags (HPO, CV) 
 # For example:
 #
 # train_predict_eval.sh /path/to/data.csv \  #-----Core params------
@@ -18,17 +18,13 @@
 #               $CONDA_ENV_NAME
 #               $HPO_true_or_false \         #-----Bool opts---------
 #               $CV_true_or_false \
-#               $SMOGN_true_or_false \
-#               $ONNX_true_or_false \
 #               $NUM_JOBS \                  #-----HPC opts----------
 #               $BACKEND \
 #               $PREDICT_VAR \               #-----Predict opts------
 #               /path/to/predict_data
-#               $FPI_CUTOFF                  #-----FPI opts----------
 #====================================
 
 echo Starting $0
-echo The option for ONNX is ignored!
 
 #====================================
 # Command line requirements
@@ -75,13 +71,10 @@ echo miniconda_loc $miniconda_loc
 echo my_env $my_env
 echo hpo $hpo
 echo cv $cv
-echo smogn $smogn
-echo onnx $onnx
 echo num_jobs $num_jobs
 echo backend $backend
 echo predict_var $predict_var
 echo predict_data $predict_data
-echo fpi_cutoff $fpi_cutoff
 
 #===================================
 # Conda activate and log env
@@ -106,6 +99,7 @@ conda env export | gzip -1c > ${work_dir}/requirements.yaml.gz
 #===================================
 # Run the SuperLearner
 #===================================
+
 python -m train \
        --conda_sh "${miniconda_loc}/etc/profile.d/conda.sh" \
        --superlearner_conf $sl_conf \
@@ -131,34 +125,18 @@ python -m predict \
        --predict_data ${predict_data} 1> ${work_dir}/predict.std.out 2> ${work_dir}/predict.std.err
 
 #===================================
-# Run PCA on predictions
+# PCA
 #===================================
 
-python -m pca \
-       --model_dir ${work_dir} \
-       --num_inputs ${num_inputs} \
-       --data ${input_data} \
-       --predict_var ${predict_var} \
-       --predict_data ${predict_data} 1> ${work_dir}/pca.std.out 2> ${work_dir}/pca.std.err
-
 #===================================
-# Run FPI
+# FPI
 #===================================
 
-python -m fpi \
-       --model_dir ${work_dir} \
-       --predict_var ${predict_var} \
-       --num_inputs ${num_inputs} \
-       --corr_cutoff ${fpi_cutoff} \
-       --predict_data ${predict_data} 1> ${work_dir}/fpi.std.out 2> ${work_dir}/fpi.std.err
-
 #===================================
-# Compress outputs
+# DVC
 #===================================
 
 cd $work_dir
-ls
-#WORKING HERE
 
 #===================================
 echo $0 finished!
