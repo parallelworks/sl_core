@@ -75,13 +75,6 @@
 	     value='/superlearner/sl_core/sample_inputs/superlearner_conf.py'
 	     width='50%_none%'>
       </param>
-      <param name='work_dir_base'
-             label='Working directory basename wrt archive repo'
-             type='text'
-             value='ml_models/sl_'
-             width='50%_none%'
-	     help='Prefix/base of the location where to store all SL output in the archive repo. Test!'>
-      </param>
       <param name='hpo'
 	     type='boolean'
 	     truevalue='Yes'
@@ -101,17 +94,6 @@
 	     help='Select yes to run cross-validation on the entire data set'
 	     width='25%_none%'
 	     float='right'>
-      </param>
-      <param name='backend'
-	     type='select'
-	     label='Joblib backend'
-	     width='50%'
-	     help='Select Backend'
-	     multiple='false'>
-	<option value='loky' selected='true'>loky</option>
-	<option value='multiprocessing'>multiprocessing</option>
-	<option value='threading'>threading</option>
-	<option value='dask'>dask</option>
       </param>
       <param name='n_jobs'
 	     label='Number of parallel jobs on worker'
