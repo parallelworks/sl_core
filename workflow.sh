@@ -252,9 +252,24 @@ fi
 wait
 
 echo "===================================="
+echo "Setting target name..."
+# TO DO: Standardize how features and targets are
+# specified for the workflow. This is slightly
+# complicated by the fact that the workflow
+# builds the training data on-the-fly by merging
+# multiple data sets. Once we do this, we won't
+# need to hard code the target, above.
+# Temporary storage for the original predict var
+# Respiration_Rate_mg_DO_per_L_per_H
+# Temporary storage for the best predict var
+# Normalized_Respiration_Rate_mg_DO_per_H_per_L_sediment
+target_name="Respiration_Rate_mg_DO_per_L_per_H"
+echo "Set target name to ${target_name}"
+
+echo "===================================="
 echod Step 2a: Preprocessing/Data Intake
 
-ssh $remote_user@$remote_node "cd ${abs_path_to_arch_repo}/scripts; ./preprocess.sh ${miniconda_loc} ${my_env} ${abs_path_to_data_repo}" 
+ssh $remote_user@$remote_node "cd ${abs_path_to_arch_repo}/scripts; ./preprocess.sh ${miniconda_loc} ${my_env} ${abs_path_to_data_repo} ${target_name}" 
 
 echo "===================================="
 echod Step 3: Launch jobs on cluster
@@ -273,7 +288,6 @@ echo "======> Launching SuperLearner"
 # lines for readability BUT no spaces are allowed
 # outside of " " or the interpreter will assume it's
 # the end of the command.
-echo "WARNING: Target variable name is hard coded here!"
 ssh -f ${ssh_options} $remote_user@$remote_node sbatch" "\
 --exclusive" "\
 --output=sl.std.out.${remote_node}" "\
@@ -290,21 +304,10 @@ ssh -f ${ssh_options} $remote_user@$remote_node sbatch" "\
 "${superlearner_onnx} "\
 "${superlearner_n_jobs} "\
 "${superlearner_backend} "\
-"Respiration_Rate_mg_DO_per_L_per_H "\
+"${target_name} "\
 "${abs_path_to_arch_repo}/${superlearner_predict_data} "\
 "${superlearner_fpi_corr_cutoff}""\""
 done
-
-# TO DO: Standardize how features and targets are
-# specified for the workflow. This is slightly
-# complicated by the fact that the workflow
-# builds the training data on-the-fly by merging
-# multiple data sets. Once we do this, we won't
-# need to hard code the target, above.
-# Temporary storage for the original predict var
-# Respiration_Rate_mg_DO_per_L_per_H
-# Temporary storage for the best predict var
-# Normalized_Respiration_Rate_mg_DO_per_H_per_L_sediment
 
 echo "===================================="
 echod Step 4: Monitor jobs on cluster
