@@ -263,7 +263,7 @@ echo "Setting target name..."
 # Respiration_Rate_mg_DO_per_L_per_H
 # Temporary storage for the best predict var
 # Normalized_Respiration_Rate_mg_DO_per_H_per_L_sediment
-target_name="Respiration_Rate_mg_DO_per_L_per_H"
+target_name="Normalized_Respiration_Rate_mg_DO_per_H_per_L_sediment"
 echo "Set target name to ${target_name}"
 
 echo "===================================="
