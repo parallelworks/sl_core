@@ -93,7 +93,7 @@ scipy_version="==1.7.0"
 #======================================
 # Try current versions of everything!
 python_version="=3.9"
-sklearn_version=""
+sklearn_version="==1.3.0"
 xgboost_version=""
 sklopt_version=""
 scipy_version=""
