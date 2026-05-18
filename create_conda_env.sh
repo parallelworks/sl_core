@@ -41,6 +41,14 @@
 
 echo Starting $0
 
+# Explicitly change this so
+# we do not auto-accept defaults
+# channel
+export CI=false
+
+#============================
+# 1) Install Miniconda
+#============================
 # Miniconda install location
 # The `source` command somehow
 # doesn't work with "~", so best
@@ -62,8 +70,32 @@ chmod u+x ./Miniconda3-latest-Linux-x86_64.sh
 # Clean up
 rm ./Miniconda3-latest-Linux-x86_64.sh
 
-# Define environment name
-my_env=$2
+echo Done with installation
+
+#=========================
+# 2) Miniconda setup to avoid defaults (license)
+#=========================
+
+# Start conda
+source ${miniconda_loc}/etc/profile.d/conda.sh
+
+# Must add another channel before removing defaults
+# See: https://www.anaconda.com/docs/getting-started/tos-plugin
+conda config --add channels conda-forge
+
+# Remove default channels from ~/.condarc
+conda config --remove channels defaults
+
+# Manually replace default channel with conda-forge
+# in local .condarc
+sed -i 's/defaults/conda-forge/g' ${miniconda_loc}/.condarc
+
+echo Done with Miniconda configuration
+conda config --show channels
+
+#=========================
+# 3) Specify environment
+#=========================
 
 # Define specific versions here
 # or leave blank to use whatever
@@ -101,8 +133,13 @@ scipy_version=""
 # pin numpy to version that accepts np.int.
 numpy_version="==1.22.4"
 
-# Start conda
-source ${miniconda_loc}/etc/profile.d/conda.sh
+#=========================
+# 4) Create environment
+#=========================
+
+# Define environment name
+my_env=$2
+
 conda activate base
 
 # Create new environment
@@ -112,17 +149,36 @@ conda create -y --name $my_env python${python_version}
 # Jump into new environment
 conda activate $my_env
 
+echo Done with creating environment
+conda env list
+
+#=======================
+# 5) System level installs
+#=======================
+# When mixing Conda and UV,
+# Conda should install system things
+# while UV should install python. See:
+# https://medium.com/@datagumshoe/using-uv-and-conda-together-effectively-a-fast-flexible-workflow-d046aff622f0
+
+#========================
+# 6) Install UV
+#========================
+
+#==========================
+# 7) Install
+#==========================
+
 # Install packages
 conda install -y -c conda-forge scipy${scipy_version}
 conda install -y -c conda-forge numpy${numpy_version}
-conda install -y pandas
-conda install -y matplotlib
-conda install -y scikit-learn${sklearn_version}
-conda install -y xgboost${xgboost_version}
+conda install -y -c conda-forge pandas
+conda install -y -c conda-forge matplotlib
+conda install -y -c conda-forge scikit-learn${sklearn_version}
+conda install -y -c conda-forge xgboost${xgboost_version}
 conda install -y -c conda-forge scikit-optimize${sklopt_version}
 conda install -y -c conda-forge onnxmltools
 conda install -y -c conda-forge onnxruntime
-conda install -y seaborn
+conda install -y -c conda-forge seaborn
 
 # Pip packages last
 # SMOGN on pip does not allow for seed option.  Use dev.
