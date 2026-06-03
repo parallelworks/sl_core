@@ -45,12 +45,12 @@ jobs:
           echo Cloning archive repository...
           git clone ${{ inputs.repositories.ml_arch_repo }}
           echo Adding/Checking out archive branch...
-          cd ${{ inputs.repositories.ml_arch_repo }}
+          cd $(basename ${{ inputs.repositories.ml_arch_repo }} )
           git branch ${{ inputs.repositories.ml_arch_branch }}
           git checkout ${{ inputs.repositories.ml_arch_branch }}
           echo Set upstream branch in case it exists already...
           git branch --set-upstream-to=origin/${{ inputs.repositories.ml_arch_branch }} ${{ inputs.repositories.ml_arch_branch }}
-          cd ..
+          cd ${{ inputs.resources.top_work_dir }}
           echo Cloning ML code repository...
           git clone ${{ inputs.repositories.ml_code_repo }}
           echo Cloning ML data repository...
@@ -62,7 +62,8 @@ jobs:
           if [ $? -ne 0 ]; then
             echo "======> No Conda found; install Conda environment for SuperLearner."
             echo This process can take several minutes.
-            cd ${{ inputs.resources.top_work_dir }}/${{ ml_code_repo }}
+            cd ${{ inputs.resources.top_work_dir }}
+            cd $(basename ${{ inputs.repositories.ml_code_repo }} )
             ./create_conda_env.sh ${{ inputs.resources.miniconda_loc }} ${{ inputs.resources.my_env }}
           else
             echo "======> Conda found!  Assuming no need to install."
