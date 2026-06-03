@@ -32,8 +32,9 @@ jobs:
           echo "Start check:"
           echo "first=${GH_TOKEN:0:4}"
           echo $GITHUB_TOKEN | gh auth login --with-token
-          gh auth status
+          #gh auth status
           gh_login_name=$(gh api user -q ".login" 2>/dev/null || echo "github-actions[bot]")
+          echo Detected GitHub login name: ${gh_login_name}
           git config --global user.name ${gh_login_name}
           git config --global user.email ${gh_login_name}@users.noreply.github.com
           gh auth setup-git
