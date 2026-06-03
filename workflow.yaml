@@ -34,23 +34,50 @@ jobs:
           echo $GITHUB_TOKEN | gh auth login --with-token
           gh auth status
           gh_login_name=$(gh api user -q ".login" 2>/dev/null || echo "github-actions[bot]")
-          git config --global user.name $(gh_login_name)
-          git config --global user.email $(gh_login_name)@users.noreply.github.com
+          git config --global user.name ${gh_login_name}
+          git config --global user.email ${gh_login_name}@users.noreply.github.com
           gh auth setup-git
-      - name: Clone repository and push a branch
+      - name: Clone repositories
+        run: |
+          echo Changing to top level working directory
+          cd ${{ inputs.resources.top_work_dir }}
+          pwd
+          echo Cloning archive repository...
+          git clone ${{ inputs.repositories.ml_arch_repo }}
+          echo Adding/Checking out archive branch...
+          cd ${{ inputs.repositories.ml_arch_repo }}
+          git branch ${{ inputs.repositories.ml_arch_branch }}
+          git checkout ${{ inputs.repositories.ml_arch_branch }}
+          echo Set upstream branch in case it exists already...
+          git branch --set-upstream-to=origin/${{ inputs.repositories.ml_arch_branch }} ${{ inputs.repositories.ml_arch_branch }}
+          cd ..
+          echo Cloning ML code repository...
+          git clone ${{ inputs.repositories.ml_code_repo }}
+          echo Cloning ML data repository...
+          git clone ${{ inputs.repositories.ml_data_repo }}
+      - name: Install Miniconda and setup Python stack
+        run: |
+          echo "======> Test for presence of Conda environment"
+          ls ${{ inputs.resources.miniconda_loc }}
+          if [ $? -ne 0 ]; then
+            echo "======> No Conda found; install Conda environment for SuperLearner."
+            echo This process can take several minutes.
+            cd ${{ inputs.resources.top_work_dir }}/${{ ml_code_repo }}
+            ./create_conda_env.sh ${{ inputs.resources.miniconda_loc }} ${{ inputs.resources.my_env }}
+          else
+            echo "======> Conda found!  Assuming no need to install."
+          fi
+      - name: Push branch to archive repository
         env:
           GITHUB_TOKEN: ${{ inputs.repositories.ml_arch_token }}
         run: |
           export "PATH=${PATH}:~/bin/gh/bin"
           echo $GITHUB_TOKEN | gh auth login --with-token
-          echo "Cloning repository"
-          git clone ${{ inputs.repositories.ml_arch_repo }}
-          cd dynamic-learning-rivers
-          git checkout ${{ inputs.repositories.ml_arch_branch }}
+          cd ${{ inputs.resources.top_work_dir }}/${{ inputs.repositories.ml_archive_repo }}
           cd output_data
           date > test.txt
           git add .
-          git commit -m "Test from YAML workflow"
+          git commit -m "Test from YAML workflow on $(date)"
           git push origin ${{ inputs.repositories.ml_arch_branch }}
 'on':
   execute:
@@ -97,10 +124,15 @@ jobs:
             autoselect: true
             optional: false
             tooltip: Name of cluster to run on. Select a resource from drop down menu.
+          top_work_dir:
+            label: Top level of working directory
+            type: string
+            tooltip: Top level of working directory. Must be on a shared directory (e.g. $HOME).
+            default: ${HOME}
           miniconda_loc:
             label: Location (prefix) of Miniconda installation
             type: string
-            default: /home/${USER}/.miniconda3
+            default: ${HOME}/.miniconda3
             tooltip: Location of miniconda on cluster. ${USER} is auto substituted.'
           my_env:
             label: Name of Miniconda environment
@@ -137,7 +169,7 @@ jobs:
             tooltip: SuperLearner configuration; path wrt ML code repo
             default: sample_inputs/superlearner_conf.py
           work_dir_base:
-            label: Working directory basename wrt archive repo
+            label: SuperLearner working directory basename wrt archive repo
             type: string
             default: ml_models/sl_
             tooltip: Prefix/base of the location where to store all SL output in the archive repo.
