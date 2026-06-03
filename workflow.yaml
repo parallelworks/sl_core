@@ -34,8 +34,8 @@ jobs:
           echo $GITHUB_TOKEN | gh auth login --with-token
           gh auth status
           gh_login_name=$(gh api user -q ".login" 2>/dev/null || echo "github-actions[bot]")
-          git config --global user.name $(gh_login_name)
-          git config --global user.email $(gh_login_name)@users.noreply.github.com
+          git config --global user.name ${gh_login_name}
+          git config --global user.email ${gh_login_name}@users.noreply.github.com
           gh auth setup-git
       - name: Clone repository and push a branch
         env:
