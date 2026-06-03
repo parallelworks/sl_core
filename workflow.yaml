@@ -38,6 +38,12 @@ jobs:
           git config --global user.email ${gh_login_name}@users.noreply.github.com
           gh auth setup-git
       - name: Clone repositories
+        # Force all repos to pull.  The clone operations
+        # may fail if the repo already exists (i.e. a cluster
+        # is being used again to run the workflow again). However,
+        # in that case, it is essential that the repos pull in
+        # any new updates (because the clone failed, so nothing
+        # new was pulled).
         run: |
           echo Changing to top level working directory
           cd ${{ inputs.resources.top_work_dir }}
@@ -50,11 +56,16 @@ jobs:
           git checkout ${{ inputs.repositories.ml_arch_branch }}
           echo Set upstream branch in case it exists already...
           git branch --set-upstream-to=origin/${{ inputs.repositories.ml_arch_branch }} ${{ inputs.repositories.ml_arch_branch }}
+          git pull
           cd ${{ inputs.resources.top_work_dir }}
           echo Cloning ML code repository...
           git clone ${{ inputs.repositories.ml_code_repo }}
+          cd $(basename ${{ inputs.repositories.ml_code_repo }} )
+          git pull
           echo Cloning ML data repository...
           git clone ${{ inputs.repositories.ml_data_repo }}
+          cd $(basename ${{ inputs.repositories.ml_data_repo }} )
+          git pull
       - name: Install Miniconda and setup Python stack
         run: |
           echo "======> Test for presence of Conda environment"
@@ -74,7 +85,8 @@ jobs:
         run: |
           export "PATH=${PATH}:~/bin/gh/bin"
           echo $GITHUB_TOKEN | gh auth login --with-token
-          cd ${{ inputs.resources.top_work_dir }}/${{ inputs.repositories.ml_archive_repo }}
+          cd ${{ inputs.resources.top_work_dir }}
+          cd $(basename ${{ inputs.repositories.ml_arch_repo }} )
           cd output_data
           date > test.txt
           git add .
