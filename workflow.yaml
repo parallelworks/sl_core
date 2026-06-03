@@ -88,7 +88,108 @@ jobs:
           else
             echo "======> Conda found!  Assuming no need to install."
           fi
+      - name: Run preprocessing
+        #===============================================
+        # TO DO: Standardize how features and targets are
+        # specified for the workflow. This is slightly
+        # complicated by the fact that the workflow
+        # builds the training data on-the-fly by merging
+        # multiple data sets. Once we do this, we won't
+        # need to hard code the target name as done 
+        # immediately below.
+        #===============================================
+        # Temporary storage for the original predict var
+        # from various other iterations:
+        # Respiration_Rate_mg_DO_per_L_per_H
+        # Temporary storage for the best predict var
+        # Normalized_Respiration_Rate_mg_DO_per_H_per_L_sediment
+        run: |
+          echo "===================================="
+          echo "Setting target name..."
+          target_name="Normalized_Respiration_Rate_mg_DO_per_H_per_L_sediment"
+          echo "Set target name to ${target_name}"
+          echo "===================================="
+          cd ${{ inputs.resources.top_work_dir }}
+          cd $(basename ${{ inputs.repositories.ml_arch_repo }} )
+          cd scripts
+          ./preprocess.sh ${{ inputs.resources.miniconda_loc }} ${{ inputs.resources.my_env }} ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_data_repo }} ) ${target_name}
+      - name: Run learning and model evaluation
+        # Here we launch 10 independent, simultaneous 
+        # ML jobs based on num_inst, below. The first
+        # stage of the loop will remove any existing
+        # files in work_dir_base in case the workflow
+        # is rerunning on a cluster that experienced
+        # a crash.
+        run: |
+          echo "===================================="
+          echo "Setting target name..."
+          target_name="Normalized_Respiration_Rate_mg_DO_per_H_per_L_sediment"
+          echo "Set target name to ${target_name}"
+          echo "===================================="
+          for (( ii=0; ii<${{ inputs.superlearner.num_inst }}; ii++ ))
+          do
+            # Launch a single SuperLearner job
+            work_dir=${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }} )/${work_dir_base}${ii}
+            echo "=======> Deleting any existing data in ${work_dir}"
+            rm -rf ${work_dir}
+            echo "=======> Creating work dir: ${work_dir}"
+            mkdir -p ${work_dir}
+            echo "======> Building job card ${ii}"
+            cat << EOF > sl.${{ inputs.repositories.ml_arch_branch }}.${ii}.sbatch
+            #!/bin/bash
+            #SBATCH --exclusive
+            #SBATCH --job-name=${{ inputs.repositories.ml_arch_branch }}.${ii}
+            #SBATCH --output=sl.std.out.${{ inputs.repositories.ml_arch_branch }}.${ii}
+            cd ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_code_repo }})
+            ./train_predict_eval.sh \
+            ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_code_repo }})/${{ inputs.superlearner.train_test_data }} \
+            ${{ inputs.superlearner.num_inputs }} \
+            ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_code_repo }})/${{ inputs.superlearner.superlearner_conf }} \
+            ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/${{ inputs.repositories.work_dir_base }} \
+            ${{ inputs.resources.miniconda_loc }} \
+            ${{ inputs.resources.my_env }} \
+            ${{ inputs.superlearner.hpo }} \
+            ${{ inputs.superlearner.cross_val_score }} \
+            ${{ inputs.superlearner.smogn }} \
+            ${{ inputs.superlearner.onnx }} \
+            ${{ inputs.superlearner.n_jobs }} \
+            ${{ inputs.superlearner.backend }} \
+            ${target_name} \
+            ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/${{ inputs.superlearner.predict_data }} \
+            ${{ inputs.superlearner.fpi_corr_cutoff }}
+            EOF
+            echo "======> Launching SuperLearner ${ii}"
+            sbatch sl.${{ inputs.repositories.ml_arch_branch }}.${ii}.sbatch
+          done
+          echo "===================================="
+      - name: Monitor jobs on cluster
+        # Check if there are any other running jobs on the cluster
+        # by counting the number of lines in squeue output. One
+        # line is the header line => no jobs are running.  Anything
+        # more than 1 means that there is at least one job running.
+        run: |
+          n_squeue="2"
+          squeue_wait=10
+          while [ $n_squeue -gt 1 ]
+          do
+            # Wait first - sbatch launches may take
+            # a few seconds to register on squeue!
+            echo "Monitor waiting "${squeue_wait}" seconds..."
+            sleep $squeue_wait
+            n_squeue=$(squeue | wc -l )
+            echo "Found "${n_squeue}" lines in squeue."
+          done
+          echo "No more pending jobs in squeue.
+      - name: Run postprocessing
+        # TODO: Address platform side logs. Old log staging
+        # is commented out below.
+        run: |
+          cd ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/scripts
+          ./postprocess.sh ${{ inputs.resources.miniconda_loc }} ${{ inputs.resources.my_env }} ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_data_repo }})
+          #echo "======> Stage PW logs to remote repo for committing"
+          #rsync -av ./logs.out $remote_user@$remote_node:${abs_path_to_arch_repo}/output_data/logs.out
       - name: Push branch to archive repository
+        # TODO: Add option not to commit (i.e. manual launch from GUI)
         env:
           GITHUB_TOKEN: ${{ inputs.repositories.ml_arch_token }}
         run: |
@@ -96,10 +197,10 @@ jobs:
           echo $GITHUB_TOKEN | gh auth login --with-token
           cd ${{ inputs.resources.top_work_dir }}
           cd $(basename ${{ inputs.repositories.ml_arch_repo }} )
-          cd output_data
-          date > test.txt
-          git add .
-          git commit -m "Test from YAML workflow on $(date)"
+          #cd output_data
+          #date > test.txt
+          git add --all .
+          git commit -m "ICON-ModEx iteration on $(date)"
           git push origin ${{ inputs.repositories.ml_arch_branch }}
 'on':
   execute:
