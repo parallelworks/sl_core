@@ -1,5 +1,5 @@
 jobs:
-  test_connections:
+  setup-and-launch:
     ssh:
       remoteHost: ${{ inputs.resources.whost.ip }}
     steps:
@@ -21,12 +21,37 @@ jobs:
           rm gh.tar.gz
           cd ~/bin
           mv gh* gh
-      - name: Clone repository
+      - name: Setup GitHub CLI and git
         env:
-          GITHUB_TOKEN: ${{ inputs.repositories.ml_arch_token}}
+          GITHUB_TOKEN: ${{ inputs.repositories.ml_arch_token }}
+          GH_TOKEN: ${{ inputs.repositories.ml_arch_token }}
         run: |
+          export "PATH=${PATH}:~/bin/gh/bin"
+          echo "Length check:"
+          echo "len=${#GH_TOKEN}"
+          echo "Start check:"
+          echo "first=${GH_TOKEN:0:4}"
+          echo $GITHUB_TOKEN | gh auth login --with-token
+          gh auth status
+          gh_login_name=$(gh api user -q ".login" 2>/dev/null || echo "github-actions[bot]")
+          git config --global user.name $(gh_login_name)
+          git config --global user.email $(gh_login_name)@users.noreply.github.com
+          gh auth setup-git
+      - name: Clone repository and push a branch
+        env:
+          GITHUB_TOKEN: ${{ inputs.repositories.ml_arch_token }}
+        run: |
+          export "PATH=${PATH}:~/bin/gh/bin"
+          echo $GITHUB_TOKEN | gh auth login --with-token
           echo "Cloning repository"
-          #git clone https://github.com/parallelworks/sl_core
+          git clone ${{ inputs.repositories.ml_arch_repo }}
+          cd dynamic-learning-rivers
+          git checkout ${{ inputs.repositories.ml_arch_branch }}
+          cd output_data
+          date > test.txt
+          git add .
+          git commit -m "Test from YAML workflow"
+          git push origin ${{ inputs.repositories.ml_arch_branch }}
 'on':
   execute:
     inputs:
@@ -38,7 +63,7 @@ jobs:
           ml_arch_repo:
             label: ML archive repository
             type: string
-            default: git@github.com:parallelworks/dynamic-learning-rivers
+            default: https://github.com/parallelworks/dynamic-learning-rivers
             tooltip: Repo MUST have SSH prefix, e.g. git@github.com:org/repo, for SSH auth w/ deploy keys to push
           ml_arch_branch:
             label: ML archive branch
@@ -46,7 +71,7 @@ jobs:
             default: test-auto-workflow
           ml_arch_token:
             label: GitHub Token
-            type: string
+            type: password
             default: ghp_...
             tooltip: When launching this workflow manually from the form, you can use your GitHub Personal Access Token. When running this workflow via a GitHub Action, you can use the repository ${{ secrets.GITHUB_TOKEN }}
           push_to_gh:
