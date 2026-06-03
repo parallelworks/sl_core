@@ -33,7 +33,15 @@ jobs:
           echo "first=${GH_TOKEN:0:4}"
           echo $GITHUB_TOKEN | gh auth login --with-token
           #gh auth status
-          gh_login_name=$(gh api user -q ".login" 2>/dev/null || echo "github-actions[bot]")
+          if [[ ${GH_TOKEN:0:4} == "ghs_" ]]; then
+            # Using GITHUB_TOKEN from Action
+            gh_login_name="github-actions[bot]"
+          else
+            # Using a PAT
+            gh_login_name=$(gh api user -q ".login" 2>/dev/null)
+          fi
+          # Autodectect one liner does not always work.
+          #gh_login_name=$(gh api user -q ".login" 2>/dev/null || echo "github-actions[bot]")
           echo Detected GitHub login name: ${gh_login_name}
           git config --global user.name ${gh_login_name}
           git config --global user.email ${gh_login_name}@users.noreply.github.com
