@@ -87,10 +87,12 @@ jobs:
           git clone ${{ inputs.repositories.ml_code_repo }}
           cd $(basename ${{ inputs.repositories.ml_code_repo }} )
           git pull
+          cd ${{ inputs.resources.top_work_dir }}
           echo Cloning ML data repository...
           git clone ${{ inputs.repositories.ml_data_repo }}
           cd $(basename ${{ inputs.repositories.ml_data_repo }} )
           git pull
+          cd ${{ inputs.resources.top_work_dir }}
       - name: Install Miniconda and setup Python stack
         run: |
           echo "======> Test for presence of Conda environment"
