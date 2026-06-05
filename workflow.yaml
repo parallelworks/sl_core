@@ -13,6 +13,12 @@ jobs:
           pwd
           echo "Print local user: ${USER}"
       - name: Install GitHub CLI
+        # This step is only required if we need to
+        # push to the repository later. By checking
+        # for whether we need to push here, we can
+        # run the workflow manually with an empty 
+        # GITHUB_TOKEN for debugging, etc.
+        if: ${{ inputs.repositories.push_to_gh }}
         run: |
           mkdir -p ~/bin
           rm -rf ~/bin/gh*
@@ -22,6 +28,8 @@ jobs:
           cd ~/bin
           mv gh* gh
       - name: Setup GitHub CLI and git
+        # This step is only required if pushing to GitHub
+        if: ${{ inputs.repositories.push_to_gh }}
         env:
           GITHUB_TOKEN: ${{ inputs.repositories.ml_arch_token }}
           GH_TOKEN: ${{ inputs.repositories.ml_arch_token }}
@@ -63,8 +71,16 @@ jobs:
           cd $(basename ${{ inputs.repositories.ml_arch_repo }} )
           git branch ${{ inputs.repositories.ml_arch_branch }}
           git checkout ${{ inputs.repositories.ml_arch_branch }}
-          echo Set upstream branch in case it exists already...
-          git branch --set-upstream-to=origin/${{ inputs.repositories.ml_arch_branch }} ${{ inputs.repositories.ml_arch_branch }}
+          # If the branch does not already exist, the following
+          # will result in an error but the workflow continues.
+          # The check is included here since under most 
+          # circumstances it is expected that the branch will already
+          # exist when pushing to GitHub and the branch will NOT
+          # already exist when not pushing to GitHub (a manual test run).
+          if [[ "${{ inputs.repositories.push_to_gh }}" == "true" ]]; then
+            echo Set upstream branch in case it exists already...
+            git branch --set-upstream-to=origin/${{ inputs.repositories.ml_arch_branch }} ${{ inputs.repositories.ml_arch_branch }}
+          fi
           git pull
           cd ${{ inputs.resources.top_work_dir }}
           echo Cloning ML code repository...
