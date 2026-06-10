@@ -10,7 +10,9 @@
 # 5) Boolean flags (HPO, CV, SMOGN, ONNX) 
 # For example:
 #
-# train_predict_eval.sh /path/to/data.csv \  #-----Core params------
+# train_predict_eval.sh \
+#               /path/to/data.csv \  #-----Core params------
+#               /path/to/groups.csv
 #               $NUM_INPUTS
 #               /path/to/sl_conf.py \
 #               /path/to/work_dir \
@@ -36,38 +38,42 @@ echo The option for ONNX is ignored!
 # Define the training data (input)
 input_data=$1
 
+# Define the group data (input)
+input_groups=$2
+
 # Set the number of inputs
-num_inputs=$2
+num_inputs=$3
 
 # Set the SuperLearner configuration
-sl_conf=$3
+sl_conf=$4
 
 # Define the work dir (where to run and put output)
-work_dir=$4
+work_dir=$5
 
 # Define Conda environment location and name
-miniconda_loc=$5
-my_env=$6
+miniconda_loc=$6
+my_env=$7
 
 # Workflow boolean options (all either True or False)
-hpo=$7
-cv=$8
-smogn=$9
-onnx=${10}
+hpo=$8
+cv=$9
+smogn=$10
+onnx=${11}
 
 # HPC options
-num_jobs=${11}
-backend=${12}
+num_jobs=${12}
+backend=${13}
 
 # Predict options
-predict_var=${13}
-predict_data=${14}
+predict_var=${14}
+predict_data=${15}
 
 # FPI options
-fpi_cutoff=${15}
+fpi_cutoff=${16}
 
 echo Checking command line inputs:
 echo input_data $input_data
+echo input_groups $input_groups
 echo num_inputs $num_inputs
 echo sl_conf $sl_conf
 echo work_dir $work_dir
@@ -117,6 +123,7 @@ python -m train \
        --hpo $hpo \
        --smogn $smogn \
        --data ${input_data} \
+       --groups ${input_groups} \
        --backend $backend 1> ${work_dir}/train.std.out 2> ${work_dir}/train.std.err
 
 #===================================

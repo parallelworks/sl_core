@@ -160,7 +160,8 @@ jobs:
             #SBATCH --output=sl.std.out.${{ inputs.repositories.ml_arch_branch }}.${ii}
             cd ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_code_repo }})
             ./train_predict_eval.sh \
-            ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_code_repo }})/${{ inputs.superlearner.train_test_data }} \
+            ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/${{ inputs.superlearner.train_test_data }} \
+            ${{ inputs.resources.top_work_dir }}/${basename ${{ inputs.repositories.ml_arch_repo }})/${{ inputs.superlearner.train_test_groups }} \
             ${{ inputs.superlearner.num_inputs }} \
             ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_code_repo }})/${{ inputs.superlearner.superlearner_conf }} \
             ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/${{ inputs.superlearner.work_dir_base }} \
@@ -292,10 +293,10 @@ jobs:
             tooltip: The header contains the parameter names; the inputs must occupy the first columns; path wrt ML archive repo.
             default: scripts/prep_06_output_final_train.csv
           train_test_groups:
-            label: File [.csv] with first column listing of group IDs
+            label: File [.csv] with column named gid listing group IDs
             type: string
             tooltip: Provide an integer group ID for each row in the training/test data for GroupShuffleSplit. Additional columns are ignored but can be used for referencing later.
-            default: scripts/prep_06_output_final_gid.csv
+            default: scripts/prep_06_output_final_train.ixy
           predict_data:
             label: Data for predicting [.csv] [Inputs, Outputs]
             type: string
