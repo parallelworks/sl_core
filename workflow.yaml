@@ -13,6 +13,12 @@ jobs:
           pwd
           echo "Print local user: ${USER}"
       - name: Install GitHub CLI
+        # This step is only required if we need to
+        # push to the repository later. By checking
+        # for whether we need to push here, we can
+        # run the workflow manually with an empty 
+        # GITHUB_TOKEN for debugging, etc.
+        if: ${{ inputs.repositories.push_to_gh }}
         run: |
           mkdir -p ~/bin
           rm -rf ~/bin/gh*
@@ -22,6 +28,8 @@ jobs:
           cd ~/bin
           mv gh* gh
       - name: Setup GitHub CLI and git
+        # This step is only required if pushing to GitHub
+        if: ${{ inputs.repositories.push_to_gh }}
         env:
           GITHUB_TOKEN: ${{ inputs.repositories.ml_arch_token }}
           GH_TOKEN: ${{ inputs.repositories.ml_arch_token }}
@@ -63,18 +71,28 @@ jobs:
           cd $(basename ${{ inputs.repositories.ml_arch_repo }} )
           git branch ${{ inputs.repositories.ml_arch_branch }}
           git checkout ${{ inputs.repositories.ml_arch_branch }}
-          echo Set upstream branch in case it exists already...
-          git branch --set-upstream-to=origin/${{ inputs.repositories.ml_arch_branch }} ${{ inputs.repositories.ml_arch_branch }}
+          # If the branch does not already exist, the following
+          # will result in an error but the workflow continues.
+          # The check is included here since under most 
+          # circumstances it is expected that the branch will already
+          # exist when pushing to GitHub and the branch will NOT
+          # already exist when not pushing to GitHub (a manual test run).
+          if [[ "${{ inputs.repositories.push_to_gh }}" == "true" ]]; then
+            echo Set upstream branch in case it exists already...
+            git branch --set-upstream-to=origin/${{ inputs.repositories.ml_arch_branch }} ${{ inputs.repositories.ml_arch_branch }}
+          fi
           git pull
           cd ${{ inputs.resources.top_work_dir }}
           echo Cloning ML code repository...
           git clone ${{ inputs.repositories.ml_code_repo }}
           cd $(basename ${{ inputs.repositories.ml_code_repo }} )
           git pull
+          cd ${{ inputs.resources.top_work_dir }}
           echo Cloning ML data repository...
           git clone ${{ inputs.repositories.ml_data_repo }}
           cd $(basename ${{ inputs.repositories.ml_data_repo }} )
           git pull
+          cd ${{ inputs.resources.top_work_dir }}
       - name: Install Miniconda and setup Python stack
         run: |
           echo "======> Test for presence of Conda environment"
@@ -142,7 +160,8 @@ jobs:
             #SBATCH --output=sl.std.out.${{ inputs.repositories.ml_arch_branch }}.${ii}
             cd ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_code_repo }})
             ./train_predict_eval.sh \
-            ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_code_repo }})/${{ inputs.superlearner.train_test_data }} \
+            ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/${{ inputs.superlearner.train_test_data }} \
+            ${{ inputs.resources.top_work_dir }}/${basename ${{ inputs.repositories.ml_arch_repo }})/${{ inputs.superlearner.train_test_groups }} \
             ${{ inputs.superlearner.num_inputs }} \
             ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_code_repo }})/${{ inputs.superlearner.superlearner_conf }} \
             ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/${{ inputs.superlearner.work_dir_base }} \
@@ -189,7 +208,7 @@ jobs:
           #echo "======> Stage PW logs to remote repo for committing"
           #rsync -av ./logs.out $remote_user@$remote_node:${abs_path_to_arch_repo}/output_data/logs.out
       - name: Push branch to archive repository
-        # TODO: Add option not to commit (i.e. manual launch from GUI)
+        if: ${{ inputs.repositories.push_to_gh }}
         env:
           GITHUB_TOKEN: ${{ inputs.repositories.ml_arch_token }}
         run: |
@@ -273,10 +292,10 @@ jobs:
             tooltip: The header contains the parameter names; the inputs must occupy the first columns; path wrt ML archive repo.
             default: scripts/prep_06_output_final_train.csv
           train_test_groups:
-            label: File [.csv] with first column listing of group IDs
+            label: File [.csv] with column named gid listing group IDs
             type: string
             tooltip: Provide an integer group ID for each row in the training/test data for GroupShuffleSplit. Additional columns are ignored but can be used for referencing later.
-            default: scripts/prep_06_output_final_gid.csv
+            default: scripts/prep_06_output_final_train.ixy
           predict_data:
             label: Data for predicting [.csv] [Inputs, Outputs]
             type: string
