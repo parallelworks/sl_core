@@ -154,12 +154,12 @@ jobs:
             mkdir -p ${work_dir}
             echo "======> Building job card ${ii}"
             cat << EOF > sl.${{ inputs.repositories.ml_arch_branch }}.${ii}.sbatch
-            #!/bin/bash
-            #SBATCH --exclusive
-            #SBATCH --job-name=${{ inputs.repositories.ml_arch_branch }}.${ii}
-            #SBATCH --output=sl.std.out.${{ inputs.repositories.ml_arch_branch }}.${ii}
-            cd ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_code_repo }})
-            ./train_predict_eval.sh \
+          #!/bin/bash
+          #SBATCH --exclusive
+          #SBATCH --job-name=${{ inputs.repositories.ml_arch_branch }}.${ii}
+          #SBATCH --output=sl.std.out.${{ inputs.repositories.ml_arch_branch }}.${ii}
+          cd ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_code_repo }})
+          ./train_predict_eval.sh \
             ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/${{ inputs.superlearner.train_test_data }} \
             ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/${{ inputs.superlearner.train_test_groups }} \
             ${{ inputs.superlearner.num_inputs }} \
