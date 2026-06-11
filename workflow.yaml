@@ -208,7 +208,7 @@ jobs:
           #echo "======> Stage PW logs to remote repo for committing"
           #rsync -av ./logs.out $remote_user@$remote_node:${abs_path_to_arch_repo}/output_data/logs.out
       - name: Push branch to archive repository
-        if: ${{ inputs.repositories.push_to_gh == true }}
+        if: ${{ inputs.repositories.push_to_gh }}
         env:
           GITHUB_TOKEN: ${{ inputs.repositories.ml_arch_token }}
         run: |
