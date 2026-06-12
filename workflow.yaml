@@ -147,7 +147,7 @@ jobs:
           for (( ii=0; ii<${{ inputs.superlearner.num_inst }}; ii++ ))
           do
             # Launch a single SuperLearner job
-            work_dir=${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }} )/${{work_dir_base}}${ii}
+            work_dir=${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }} )/${{ inputs.superlearner.work_dir_base }}${ii}
             echo "=======> Deleting any existing data in ${work_dir}"
             rm -rf ${work_dir}
             echo "=======> Creating work dir: ${work_dir}"
