@@ -147,7 +147,7 @@ jobs:
           for (( ii=0; ii<${{ inputs.superlearner.num_inst }}; ii++ ))
           do
             # Launch a single SuperLearner job
-            work_dir=${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }} )/${work_dir_base}${ii}
+            work_dir=${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }} )/${{work_dir_base}}${ii}
             echo "=======> Deleting any existing data in ${work_dir}"
             rm -rf ${work_dir}
             echo "=======> Creating work dir: ${work_dir}"
@@ -193,20 +193,18 @@ jobs:
           do
             # Wait first - sbatch launches may take
             # a few seconds to register on squeue!
-            echo "Monitor waiting "${squeue_wait}" seconds..."
+            echo "Monitor waiting ${squeue_wait} seconds..."
             sleep $squeue_wait
             n_squeue=$(squeue | wc -l )
-            echo "Found "${n_squeue}" lines in squeue."
+            echo "Found ${n_squeue} lines in squeue."
           done
-          echo "No more pending jobs in squeue.
+          echo "No more pending jobs in squeue."
       - name: Run postprocessing
-        # TODO: Address platform side logs. Old log staging
-        # is commented out below.
         run: |
           cd ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/scripts
           ./postprocess.sh ${{ inputs.resources.miniconda_loc }} ${{ inputs.resources.my_env }} ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_data_repo }})
-          #echo "======> Stage PW logs to remote repo for committing"
-          #rsync -av ./logs.out $remote_user@$remote_node:${abs_path_to_arch_repo}/output_data/logs.out
+          echo "======> Stage PW logs to remote repo for committing"
+          rsync -av ./logs ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/output_data/
       - name: Push branch to archive repository
         if: ${{ inputs.repositories.push_to_gh }}
         env:
