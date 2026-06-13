@@ -208,7 +208,9 @@ jobs:
         run: |
           cd ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/scripts
           ./postprocess.sh ${{ inputs.resources.miniconda_loc }} ${{ inputs.resources.my_env }} ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_data_repo }})
-          echo "======> Stage PW logs to remote repo for committing"
+      - name: Sync logs
+        run: |
+          echo "======> Stage workflow logs to repo for committing"
           rsync -av ./logs ${{ inputs.resources.top_work_dir }}/$(basename ${{ inputs.repositories.ml_arch_repo }})/output_data/
       - name: Push branch to archive repository
         if: ${{ inputs.repositories.push_to_gh }}
